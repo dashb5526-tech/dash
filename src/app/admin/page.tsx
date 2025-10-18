@@ -31,20 +31,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { products as initialProducts } from "@/components/sections/products";
+import { getProducts, saveProducts, Product } from "@/lib/products";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-type Product = typeof initialProducts[0];
 
 export default function AdminPage() {
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    getProducts().then(setProducts);
+  }, []);
 
   const openDialogForNew = () => {
     setEditingProduct(null);
@@ -56,24 +60,48 @@ export default function AdminPage() {
     setIsDialogOpen(true);
   };
   
-  const handleSaveChanges = (productData: Product) => {
-    toast({
-        title: "Changes Not Saved",
-        description: "This is a demo. Changes are not saved without a database.",
+  const handleSaveChanges = async (productData: Product) => {
+    try {
+      let updatedProducts;
+      if (editingProduct) {
+        // Update existing product
+        updatedProducts = products.map(p => p.name === editingProduct.name ? productData : p);
+      } else {
+        // Add new product
+        updatedProducts = [...products, productData];
+      }
+      setProducts(updatedProducts);
+      await saveProducts(updatedProducts);
+      toast({
+        title: "Changes Saved",
+        description: "Product has been saved successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Save Failed",
+        description: "Failed to save product changes.",
         variant: "destructive",
-    });
-    // This is where you would save to a database.
-    // For now, we just close the dialog.
+      });
+    }
     setIsDialogOpen(false);
   };
 
-  const handleDelete = (productName: string) => {
-     toast({
-        title: "Product Not Deleted",
-        description: "This is a demo. Deleting products is not enabled without a database.",
+  const handleDelete = async (productName: string) => {
+    try {
+      const updatedProducts = products.filter(p => p.name !== productName);
+      setProducts(updatedProducts);
+      await saveProducts(updatedProducts);
+      toast({
+        title: "Product Deleted",
+        description: "Product has been deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete product.",
         variant: "destructive",
-    });
-    // This is where you would delete from a database.
+      });
+    }
   }
 
   return (
@@ -152,6 +180,9 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [imageId, setImageId] = useState("");
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -159,14 +190,36 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
             setName(product.name);
             setDescription(product.description);
             setImageId(product.imageId);
+            setImageUrl(product.imageUrl);
+            setPreviewUrl(product.imageUrl);
         } else {
             setName("");
             setDescription("");
             setImageId("");
+            setImageUrl(null);
+            setPreviewUrl(null);
         }
+        setSelectedFile(null);
     }, [product, isOpen]);
 
-    const handleSubmit = () => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                toast({
+                    title: "File Too Large",
+                    description: "Please select an image smaller than 10MB.",
+                    variant: "destructive",
+                });
+                return;
+            }
+            setSelectedFile(file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+        }
+    };
+
+    const handleSubmit = async () => {
         if (!name || !description || !imageId) {
             toast({
                 title: "Missing Fields",
@@ -175,7 +228,36 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
             });
             return;
         }
-        onSave({ name, description, imageId });
+
+        let finalImageUrl = imageUrl;
+
+        if (selectedFile) {
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                const result = await response.json();
+                finalImageUrl = result.imageUrl;
+            } catch (error) {
+                toast({
+                    title: "Upload Failed",
+                    description: "Failed to upload image. Please try again.",
+                    variant: "destructive",
+                });
+                return;
+            }
+        }
+
+        onSave({ name, description, imageId, imageUrl: finalImageUrl });
     }
     
     return (
@@ -187,27 +269,34 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
                         {product ? 'Update the details for this product.' : 'Fill in the details for the new product.'}
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right">Name</Label>
-                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="description" className="text-right">Description</Label>
-                        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className="col-span-3" />
-                    </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="imageId" className="text-right">Image ID</Label>
-                        <Input id="imageId" value={imageId} onChange={(e) => setImageId(e.target.value)} className="col-span-3" placeholder="e.g., basmati-grain" />
-                    </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">Image</Label>
-                        <div className="col-span-3">
-                            <input type="file" className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" disabled/>
-                             <p className="text-xs text-muted-foreground mt-2">File uploads are disabled in this demo.</p>
+                <ScrollArea className="h-[60vh] pr-6">
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="name" className="text-right">Name</Label>
+                            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="description" className="text-right">Description</Label>
+                            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className="col-span-3" />
+                        </div>
+                         <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="imageId" className="text-right">Image ID</Label>
+                            <Input id="imageId" value={imageId} onChange={(e) => setImageId(e.target.value)} className="col-span-3" placeholder="e.g., basmati-grain" />
+                        </div>
+                         <div className="grid grid-cols-4 items-center gap-4">
+                            <Label className="text-right">Image</Label>
+                            <div className="col-span-3">
+                                <input type="file" accept="image/*" onChange={handleFileChange} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+                                <p className="text-xs text-muted-foreground mt-2">Max file size: 10MB</p>
+                                {previewUrl && (
+                                    <div className="mt-2">
+                                        <Image src={previewUrl} alt="Preview" width={100} height={100} className="object-cover rounded" />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
+                </ScrollArea>
                 <DialogFooter>
                     <Button type="button" onClick={handleSubmit}>Save Changes</Button>
                 </DialogFooter>
@@ -215,3 +304,6 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
         </Dialog>
     );
 }
+
+
+    
