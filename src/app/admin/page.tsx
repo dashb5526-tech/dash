@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -35,6 +36,7 @@ import { getProducts, saveProducts, Product } from "@/lib/products";
 import { getGalleryImages, saveGalleryImages, GalleryImage } from "@/lib/gallery";
 import { getTestimonials, saveTestimonials, Testimonial } from "@/lib/testimonials";
 import { getPartners, savePartners, Partner } from "@/lib/partners";
+import { getAboutContent, saveAboutContent, AboutContent } from "@/lib/about";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star } from "lucide-react";
@@ -48,11 +50,14 @@ export default function AdminPage() {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
   const [isTestimonialDialogOpen, setIsTestimonialDialogOpen] = useState(false);
   const [isPartnerDialogOpen, setIsPartnerDialogOpen] = useState(false);
+  const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
+
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingGalleryImage, setEditingGalleryImage] = useState<GalleryImage | null>(null);
@@ -67,6 +72,7 @@ export default function AdminPage() {
     getGalleryImages().then(setGalleryImages);
     getTestimonials().then(setTestimonials);
     getPartners().then(setPartners);
+    getAboutContent().then(setAboutContent);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -382,12 +388,87 @@ export default function AdminPage() {
     }
   };
 
+  const handleAboutSave = async (newAboutContent: AboutContent, selectedFile: File | null) => {
+    try {
+        let finalImageUrl = newAboutContent.main.imageUrl;
+
+        if (selectedFile) {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            if (!response.ok) throw new Error('Image upload failed');
+            const result = await response.json();
+            finalImageUrl = result.imageUrl;
+        }
+
+        const updatedContent = {
+            ...newAboutContent,
+            main: {
+                ...newAboutContent.main,
+                imageUrl: finalImageUrl,
+            }
+        };
+
+        setAboutContent(updatedContent);
+        await saveAboutContent(updatedContent);
+        toast({
+            title: "Changes Saved",
+            description: "About page content has been saved successfully.",
+        });
+        setIsAboutDialogOpen(false);
+    } catch (error: any) {
+        toast({
+            title: "Save Failed",
+            description: error.message || "Failed to save about page content.",
+            variant: "destructive",
+        });
+    }
+  };
+
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
       <main className="flex-1 bg-secondary">
         <section className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl space-y-8">
+
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle className="font-headline text-2xl">
+                            About Page Management
+                        </CardTitle>
+                        <CardDescription>
+                            Edit the content of your "About Us" page.
+                        </CardDescription>
+                    </div>
+                    <Button onClick={() => setIsAboutDialogOpen(true)} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!aboutContent}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit Content
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                    {aboutContent ? (
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="font-semibold">Main Content</h4>
+                                <p className="text-sm text-muted-foreground">{aboutContent.main.title}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold">Services</h4>
+                                <p className="text-sm text-muted-foreground">{aboutContent.services.items.length} services listed.</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <p>Loading about page content...</p>
+                    )}
+                </CardContent>
+            </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
@@ -620,6 +701,14 @@ export default function AdminPage() {
         partner={editingPartner}
         onSave={handlePartnerSave}
       />
+      {aboutContent && (
+        <AboutEditDialog
+            isOpen={isAboutDialogOpen}
+            setIsOpen={setIsAboutDialogOpen}
+            content={aboutContent}
+            onSave={handleAboutSave}
+        />
+      )}
     </div>
   );
 }
@@ -1082,6 +1171,125 @@ function PartnerEditDialog({ isOpen, setIsOpen, partner, onSave }: PartnerEditDi
                       </div>
                     </div>
                 </div>
+                <DialogFooter>
+                    <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+
+interface AboutEditDialogProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    content: AboutContent;
+    onSave: (content: AboutContent, selectedFile: File | null) => void;
+}
+
+function AboutEditDialog({ isOpen, setIsOpen, content, onSave }: AboutEditDialogProps) {
+    const [currentContent, setCurrentContent] = useState<AboutContent>(content);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(content.main.imageUrl);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if(isOpen) {
+            setCurrentContent(content);
+            setPreviewUrl(content.main.imageUrl);
+            setSelectedFile(null);
+        }
+    }, [isOpen, content]);
+
+    const handleMainContentChange = (field: 'title' | 'paragraph1' | 'paragraph2' | 'imageHint', value: string) => {
+        setCurrentContent(prev => ({
+            ...prev,
+            main: { ...prev.main, [field]: value }
+        }));
+    };
+
+    const handleServiceChange = (index: number, field: 'title' | 'description', value: string) => {
+        const newItems = [...currentContent.services.items];
+        newItems[index] = { ...newItems[index], [field]: value };
+        setCurrentContent(prev => ({
+            ...prev,
+            services: { ...prev.services, items: newItems }
+        }));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                toast({ title: "File Too Large", description: "Please select an image smaller than 10MB.", variant: "destructive" });
+                return;
+            }
+            setSelectedFile(file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+        }
+    };
+
+    const handleSubmit = () => {
+        onSave(currentContent, selectedFile);
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>Edit About Page Content</DialogTitle>
+                    <DialogDescription>
+                        Make changes to the content of your "About Us" page.
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-[75vh] pr-6">
+                    <div className="space-y-6 py-4">
+                        <h3 className="font-semibold text-lg border-b pb-2">Main Section</h3>
+                        <div className="grid gap-4">
+                            <Label>Title</Label>
+                            <Input value={currentContent.main.title} onChange={e => handleMainContentChange('title', e.target.value)} />
+                        </div>
+                        <div className="grid gap-4">
+                            <Label>Paragraph 1</Label>
+                            <Textarea value={currentContent.main.paragraph1} onChange={e => handleMainContentChange('paragraph1', e.target.value)} rows={4}/>
+                        </div>
+                        <div className="grid gap-4">
+                            <Label>Paragraph 2</Label>
+                            <Textarea value={currentContent.main.paragraph2} onChange={e => handleMainContentChange('paragraph2', e.target.value)} rows={4}/>
+                        </div>
+                        <div className="grid gap-4">
+                            <Label>Image</Label>
+                            <input type="file" accept="image/*" onChange={handleFileChange} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+                            {previewUrl && <Image src={previewUrl} alt="Preview" width={200} height={133} className="rounded object-cover mt-2" />}
+                        </div>
+                        <div className="grid gap-4">
+                            <Label>Image Hint</Label>
+                            <Input value={currentContent.main.imageHint} onChange={e => handleMainContentChange('imageHint', e.target.value)} />
+                        </div>
+
+                        <h3 className="font-semibold text-lg border-b pb-2 pt-6">Services Section</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {currentContent.services.items.map((service, index) => (
+                                <Card key={service.id}>
+                                    <CardHeader>
+                                        <CardTitle className="text-base">{`Service ${index + 1}`}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="grid gap-2">
+                                            <Label>Title</Label>
+                                            <Input value={service.title} onChange={e => handleServiceChange(index, 'title', e.target.value)} />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label>Description</Label>
+                                            <Textarea value={service.description} onChange={e => handleServiceChange(index, 'description', e.target.value)} rows={3}/>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                </ScrollArea>
                 <DialogFooter>
                     <Button type="button" onClick={handleSubmit}>Save Changes</Button>
                 </DialogFooter>
