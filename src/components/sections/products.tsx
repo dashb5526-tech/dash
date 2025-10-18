@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -8,6 +9,47 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getProducts, Product } from "@/lib/products";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+
+function ProductCard({ product }: { product: Product }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const imageSrc = product.imageUrl || PlaceHolderImages.find(p => p.id === product.imageId)?.imageUrl;
+  const imageHint = product.imageUrl ? undefined : PlaceHolderImages.find(p => p.id === product.imageId)?.imageHint;
+
+  return (
+    <Card className="flex flex-col overflow-hidden transition-shadow duration-300 hover:shadow-xl">
+      {imageSrc && (
+          <div className="relative h-32 sm:h-56 w-full">
+            <Image
+              src={imageSrc}
+              alt={product.name}
+              fill
+              className="object-cover"
+              data-ai-hint={imageHint}
+            />
+          </div>
+        )}
+      <CardHeader className="p-4">
+        <CardTitle className="font-headline text-base sm:text-xl line-clamp-2">{product.name}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col p-4 pt-0">
+        <CardDescription className={cn("flex-1 text-xs sm:text-sm", !isExpanded && "line-clamp-3 sm:line-clamp-4")}>
+          {product.description}
+        </CardDescription>
+        {product.description.length > 100 && ( // Heuristic to decide if Read More is needed
+            <Button variant="link" size="sm" className="h-auto p-0 mt-1 text-accent justify-start text-xs" onClick={() => setIsExpanded(!isExpanded)}>
+                {isExpanded ? "Read less" : "Read more"}
+            </Button>
+        )}
+        <div className="mt-4">
+          <Button asChild variant="outline" size="sm" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+              <Link href="/contact">Ask for Pricing</Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -28,36 +70,9 @@ export function Products() {
         </div>
 
         <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-          {products.map((product) => {
-            const imageSrc = product.imageUrl || PlaceHolderImages.find(p => p.id === product.imageId)?.imageUrl;
-            const imageHint = product.imageUrl ? undefined : PlaceHolderImages.find(p => p.id === product.imageId)?.imageHint;
-            return (
-              <Card key={product.name} className="flex flex-col overflow-hidden transition-shadow duration-300 hover:shadow-xl">
-                {imageSrc && (
-                    <div className="relative h-32 sm:h-56 w-full">
-                      <Image
-                        src={imageSrc}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                        data-ai-hint={imageHint}
-                      />
-                    </div>
-                 )}
-                <CardHeader className="p-4">
-                  <CardTitle className="font-headline text-base sm:text-xl line-clamp-2">{product.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col p-4 pt-0">
-                  <CardDescription className="flex-1 text-xs sm:text-sm line-clamp-3 sm:line-clamp-4">{product.description}</CardDescription>
-                  <div className="mt-4">
-                    <Button asChild variant="outline" size="sm" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
-                        <Link href="/contact">Ask for Pricing</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {products.map((product) => (
+            <ProductCard key={product.name} product={product} />
+          ))}
         </div>
       </div>
     </section>
