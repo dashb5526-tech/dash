@@ -28,7 +28,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { submitForm } from "@/lib/actions";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { products } from "./products";
+import { getProducts, Product } from "@/lib/products";
+import { useEffect, useState } from "react";
 
 const contactFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -49,6 +50,12 @@ const orderFormSchema = z.object({
 const mapImage = PlaceHolderImages.find(p => p.id === 'map');
 
 export function Contact() {
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    getProducts().then(setProducts);
+  }, []);
+
   const contactForm = useForm<z.infer<typeof contactFormSchema>>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: { name: "", email: "", message: "" },
