@@ -34,7 +34,7 @@ export const products = [
 
 export function Products() {
   return (
-    <section id="products" className="bg-secondary">
+    <section id="products" className="bg-secondary py-16 sm:py-20 lg:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -68,7 +68,7 @@ export function Products() {
                   <CardDescription className="flex-1">{product.description}</CardDescription>
                   <div className="mt-6">
                     <Button asChild variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
-                       <Link href="#contact">Inquire for Pricing</Link>
+                       <Link href="/contact">Inquire for Pricing</Link>
                     </Button>
                   </div>
                 </CardContent>

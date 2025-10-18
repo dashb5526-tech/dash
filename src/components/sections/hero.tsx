@@ -30,10 +30,10 @@ export function Hero() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <Link href="#products">View Our Products</Link>
+                <Link href="/products">View Our Products</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground">
-                <Link href="#contact">Contact Us</Link>
+                <Link href="/contact">Contact Us</Link>
               </Button>
             </div>
           </div>

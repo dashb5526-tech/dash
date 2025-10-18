@@ -9,11 +9,12 @@ import { RiceBowl } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const sections = [
-  { name: "About", href: "#about" },
-  { name: "Products", href: "#products" },
-  { name: "Gallery", href: "#gallery" },
-  { name: "Testimonials", href: "#testimonials" },
-  { name: "Contact", href: "#contact" },
+  { name: "Home", href: "/" },
+  { name: "About", href: "/#about" },
+  { name: "Products", href: "/products" },
+  { name: "Gallery", href: "/#gallery" },
+  { name: "Testimonials", href: "/#testimonials" },
+  { name: "Contact", href: "/contact" },
 ];
 
 export function Header() {
@@ -38,7 +39,7 @@ export function Header() {
       )}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="#" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <RiceBowl className="h-8 w-8 text-primary" />
           <span className="font-headline text-2xl font-bold text-foreground">
             Dash Rice
@@ -59,7 +60,7 @@ export function Header() {
 
         <div className="flex items-center gap-4">
            <Button asChild className="hidden md:inline-flex" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-            <Link href="#contact">Order Now</Link>
+            <Link href="/contact">Order Now</Link>
           </Button>
 
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -72,7 +73,7 @@ export function Header() {
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <div className="flex h-full flex-col">
                 <div className="flex items-center justify-between border-b pb-4">
-                  <Link href="#" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
                     <RiceBowl className="h-8 w-8 text-primary" />
                     <span className="font-headline text-xl font-bold text-foreground">
                       Dash Rice Traders
@@ -96,7 +97,7 @@ export function Header() {
                   ))}
                 </nav>
                 <Button asChild className="w-full" size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                  <Link href="#contact" onClick={() => setIsMobileMenuOpen(false)}>Order Now</Link>
+                  <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>Order Now</Link>
                 </Button>
               </div>
             </SheetContent>
