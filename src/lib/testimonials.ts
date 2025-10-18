@@ -5,6 +5,7 @@ export interface Testimonial {
   name: string;
   title: string;
   rating: number;
+  authorImageUrl: string | null;
 }
 
 export async function getTestimonials(): Promise<Testimonial[]> {
@@ -36,3 +37,5 @@ export async function saveTestimonials(testimonials: Testimonial[]): Promise<voi
     console.error('Error saving testimonials:', error);
   }
 }
+
+    

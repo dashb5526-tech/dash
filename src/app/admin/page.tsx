@@ -39,6 +39,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 export default function AdminPage() {
@@ -240,13 +241,32 @@ export default function AdminPage() {
     setIsTestimonialDialogOpen(true);
   };
 
-  const handleTestimonialSave = async (testimonialData: Testimonial) => {
+  const handleTestimonialSave = async (testimonialData: Testimonial, selectedFile: File | null) => {
     try {
+      let finalAuthorImageUrl = testimonialData.authorImageUrl;
+
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Image upload failed');
+        }
+        const result = await response.json();
+        finalAuthorImageUrl = result.imageUrl;
+      }
+      
+      const newTestimonialData = { ...testimonialData, authorImageUrl: finalAuthorImageUrl };
+
       let updatedTestimonials;
       if (editingTestimonial) {
-        updatedTestimonials = testimonials.map(t => t.id === editingTestimonial.id ? testimonialData : t);
+        updatedTestimonials = testimonials.map(t => t.id === editingTestimonial.id ? newTestimonialData : t);
       } else {
-        updatedTestimonials = [...testimonials, { ...testimonialData, id: `testimonial-${Date.now()}` }];
+        updatedTestimonials = [...testimonials, { ...newTestimonialData, id: `testimonial-${Date.now()}` }];
       }
       setTestimonials(updatedTestimonials);
       await saveTestimonials(updatedTestimonials);
@@ -394,7 +414,7 @@ export default function AdminPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Author Name</TableHead>
+                      <TableHead>Author</TableHead>
                       <TableHead>Quote</TableHead>
                       <TableHead>Rating</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -403,7 +423,13 @@ export default function AdminPage() {
                   <TableBody>
                     {testimonials.map((testimonial) => (
                       <TableRow key={testimonial.id}>
-                        <TableCell className="font-medium">{testimonial.name}</TableCell>
+                        <TableCell className="font-medium flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={testimonial.authorImageUrl || undefined} alt={testimonial.name} />
+                            <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          {testimonial.name}
+                        </TableCell>
                         <TableCell className="text-muted-foreground truncate max-w-sm">{testimonial.quote}</TableCell>
                         <TableCell>
                           <div className="flex items-center">
@@ -699,7 +725,7 @@ interface TestimonialEditDialogProps {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
     testimonial: Testimonial | null;
-    onSave: (testimonialData: Testimonial) => void;
+    onSave: (testimonialData: Testimonial, selectedFile: File | null) => void;
 }
 
 function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: TestimonialEditDialogProps) {
@@ -708,6 +734,8 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
     const [quote, setQuote] = useState("");
     const [rating, setRating] = useState(5);
     const [id, setId] = useState("");
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -718,15 +746,36 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
                 setQuote(testimonial.quote);
                 setRating(testimonial.rating);
                 setId(testimonial.id);
+                setPreviewUrl(testimonial.authorImageUrl);
             } else {
                 setName("");
                 setTitle("");
                 setQuote("");
                 setRating(5);
                 setId(`testimonial-${Date.now()}`);
+                setPreviewUrl(null);
             }
+            setSelectedFile(null);
         }
     }, [testimonial, isOpen]);
+    
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB
+                toast({
+                    title: "File Too Large",
+                    description: "Please select an image smaller than 2MB.",
+                    variant: "destructive",
+                });
+                return;
+            }
+            setSelectedFile(file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+        }
+    };
+
 
     const handleSubmit = async () => {
         if (!name || !title || !quote) {
@@ -738,8 +787,8 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
             return;
         }
 
-        const testimonialData: Testimonial = { id, name, title, quote, rating };
-        onSave(testimonialData);
+        const testimonialData: Testimonial = { id, name, title, quote, rating, authorImageUrl: testimonial?.authorImageUrl || null };
+        onSave(testimonialData, selectedFile);
     }
     
     return (
@@ -751,35 +800,49 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
                         {testimonial ? 'Update the details for this testimonial.' : 'Fill in the details for the new testimonial.'}
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="testimonial-name" className="text-right">Author Name</Label>
-                        <Input id="testimonial-name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="testimonial-title" className="text-right">Author Title</Label>
-                        <Input id="testimonial-title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="testimonial-rating" className="text-right">Rating</Label>
-                        <div className="col-span-3 flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                                <Star
-                                    key={i}
-                                    className={cn(
-                                        "h-6 w-6 cursor-pointer",
-                                        i < rating ? "text-accent fill-accent" : "text-muted-foreground/50"
-                                    )}
-                                    onClick={() => setRating(i + 1)}
-                                />
-                            ))}
+                <ScrollArea className="h-[70vh] pr-6">
+                  <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="testimonial-name" className="text-right">Author Name</Label>
+                          <Input id="testimonial-name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="testimonial-title" className="text-right">Author Title</Label>
+                          <Input id="testimonial-title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="testimonial-rating" className="text-right">Rating</Label>
+                          <div className="col-span-3 flex items-center">
+                              {[...Array(5)].map((_, i) => (
+                                  <Star
+                                      key={i}
+                                      className={cn(
+                                          "h-6 w-6 cursor-pointer",
+                                          i < rating ? "text-accent fill-accent" : "text-muted-foreground/50"
+                                      )}
+                                      onClick={() => setRating(i + 1)}
+                                  />
+                              ))}
+                          </div>
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Author Image</Label>
+                        <div className="col-span-3">
+                            <input type="file" accept="image/*" onChange={handleFileChange} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+                            <p className="text-xs text-muted-foreground mt-2">Max file size: 2MB</p>
+                            {previewUrl && (
+                                <div className="mt-2">
+                                    <Image src={previewUrl} alt="Preview" width={80} height={80} className="object-cover rounded-full" />
+                                </div>
+                            )}
                         </div>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="testimonial-quote" className="text-right">Quote</Label>
-                        <Textarea id="testimonial-quote" value={quote} onChange={(e) => setQuote(e.target.value)} className="col-span-3" />
-                    </div>
-                </div>
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="testimonial-quote" className="text-right">Quote</Label>
+                          <Textarea id="testimonial-quote" value={quote} onChange={(e) => setQuote(e.target.value)} className="col-span-3" />
+                      </div>
+                  </div>
+                </ScrollArea>
                 <DialogFooter>
                     <Button type="button" onClick={handleSubmit}>Save Changes</Button>
                 </DialogFooter>
@@ -787,3 +850,5 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
         </Dialog>
     );
 }
+
+    

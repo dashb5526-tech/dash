@@ -15,6 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { getTestimonials, Testimonial } from '@/lib/testimonials';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const partnerLogos = PlaceHolderImages.filter(p => p.id.startsWith('partner-logo-'));
 
@@ -51,21 +52,25 @@ export function Testimonials() {
                   <div className="p-1">
                     <Card className="h-full">
                       <CardContent className="flex h-full flex-col items-center justify-center p-6 text-center">
-                        <div className="flex text-accent">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={cn(
-                                "h-5 w-5",
-                                i < testimonial.rating ? "fill-current" : "text-gray-300"
-                              )} 
-                            />
-                          ))}
-                        </div>
-                        <p className="mt-4 flex-1 text-muted-foreground">"{testimonial.quote}"</p>
-                        <div className="mt-4">
-                          <p className="font-semibold text-foreground">{testimonial.name}</p>
-                          <p className="text-sm text-muted-foreground">{testimonial.title}</p>
+                        <p className="mt-4 flex-1 text-lg text-muted-foreground">"{testimonial.quote}"</p>
+                        <div className="mt-6">
+                            <Avatar className="mx-auto h-16 w-16">
+                                <AvatarImage src={testimonial.authorImageUrl || undefined} alt={testimonial.name} />
+                                <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <p className="mt-4 font-semibold text-foreground">{testimonial.name}</p>
+                            <p className="text-sm text-muted-foreground">{testimonial.title}</p>
+                            <div className="mt-2 flex justify-center text-accent">
+                                {[...Array(5)].map((_, i) => (
+                                    <Star 
+                                    key={i} 
+                                    className={cn(
+                                        "h-5 w-5",
+                                        i < testimonial.rating ? "fill-current" : "text-gray-300"
+                                    )} 
+                                    />
+                                ))}
+                            </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -104,3 +109,5 @@ export function Testimonials() {
     </section>
   );
 }
+
+    
