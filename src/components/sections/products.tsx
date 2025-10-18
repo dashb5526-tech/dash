@@ -26,7 +26,7 @@ export function Products() {
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+        <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
           {products.map((product) => {
             const imageSrc = product.imageUrl || PlaceHolderImages.find(p => p.id === product.imageId)?.imageUrl;
             const imageHint = product.imageUrl ? undefined : PlaceHolderImages.find(p => p.id === product.imageId)?.imageHint;
