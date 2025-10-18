@@ -24,11 +24,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { submitForm } from "@/lib/actions";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getProducts, Product } from "@/lib/products";
+import { getContactInfo, ContactInfo } from "@/lib/contact-info";
 import { useEffect, useState } from "react";
 
 const contactFormSchema = z.object({
@@ -51,9 +52,11 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'map');
 
 export function Contact() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
 
   useEffect(() => {
     getProducts().then(setProducts);
+    getContactInfo().then(setContactInfo);
   }, []);
 
   const contactForm = useForm<z.infer<typeof contactFormSchema>>({
@@ -102,11 +105,15 @@ export function Contact() {
           <div className="space-y-8">
             <div className="space-y-4">
                <h3 className="font-headline text-2xl font-semibold">Contact Information</h3>
-               <div className="space-y-3 text-muted-foreground">
-                  <p className="flex items-center gap-3"><MapPin className="h-5 w-5 text-primary" /> Cuttack, Odisha, India</p>
-                  <p className="flex items-center gap-3"><Phone className="h-5 w-5 text-primary" /> +91 98765 43210</p>
-                  <p className="flex items-center gap-3"><Mail className="h-5 w-5 text-primary" /> dashricetraders@gmail.com</p>
-               </div>
+                {contactInfo ? (
+                 <div className="space-y-3 text-muted-foreground">
+                    <p className="flex items-center gap-3"><MapPin className="h-5 w-5 text-primary" /> {contactInfo.address}</p>
+                    <p className="flex items-center gap-3"><Phone className="h-5 w-5 text-primary" /> {contactInfo.phone}</p>
+                    <p className="flex items-center gap-3"><Mail className="h-5 w-5 text-primary" /> {contactInfo.email}</p>
+                 </div>
+                ) : (
+                    <p>Loading contact information...</p>
+                )}
             </div>
             {mapImage && (
               <div className="overflow-hidden rounded-lg shadow-lg">

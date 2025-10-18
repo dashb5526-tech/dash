@@ -1,5 +1,10 @@
+
+"use client";
+
 import Link from "next/link";
 import { RiceBowl } from "@/components/icons";
+import { useEffect, useState } from "react";
+import { getContactInfo, ContactInfo } from "@/lib/contact-info";
 
 const sections = [
   { name: "Home", href: "/" },
@@ -10,6 +15,12 @@ const sections = [
 ];
 
 export function Footer() {
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+
+  useEffect(() => {
+    getContactInfo().then(setContactInfo);
+  }, []);
+
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -34,9 +45,11 @@ export function Footer() {
         </div>
         <div className="mt-8 border-t border-border pt-8 text-center text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} Dash Rice Traders. All rights reserved.</p>
-          <p className="mt-1">
-            Cuttack, Odisha, India | +91 98765 43210 | dashricetraders@gmail.com
-          </p>
+          {contactInfo && (
+            <p className="mt-1">
+              {contactInfo.address} | {contactInfo.phone} | {contactInfo.email}
+            </p>
+          )}
         </div>
       </div>
     </footer>

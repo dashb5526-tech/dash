@@ -37,6 +37,7 @@ import { getGalleryImages, saveGalleryImages, GalleryImage } from "@/lib/gallery
 import { getTestimonials, saveTestimonials, Testimonial } from "@/lib/testimonials";
 import { getPartners, savePartners, Partner } from "@/lib/partners";
 import { getAboutContent, saveAboutContent, AboutContent } from "@/lib/about";
+import { getContactInfo, saveContactInfo, ContactInfo } from "@/lib/contact-info";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star } from "lucide-react";
@@ -52,12 +53,14 @@ export default function AdminPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
   const [isTestimonialDialogOpen, setIsTestimonialDialogOpen] = useState(false);
   const [isPartnerDialogOpen, setIsPartnerDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
+  const [isContactInfoDialogOpen, setIsContactInfoDialogOpen] = useState(false);
 
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -74,6 +77,7 @@ export default function AdminPage() {
     getTestimonials().then(setTestimonials);
     getPartners().then(setPartners);
     getAboutContent().then(setAboutContent);
+    getContactInfo().then(setContactInfo);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -428,6 +432,24 @@ export default function AdminPage() {
         });
     }
   };
+  
+    const handleContactInfoSave = async (newContactInfo: ContactInfo) => {
+        try {
+            setContactInfo(newContactInfo);
+            await saveContactInfo(newContactInfo);
+            toast({
+                title: "Changes Saved",
+                description: "Contact information has been saved successfully.",
+            });
+            setIsContactInfoDialogOpen(false);
+        } catch (error: any) {
+            toast({
+                title: "Save Failed",
+                description: error.message || "Failed to save contact information.",
+                variant: "destructive",
+            });
+        }
+    };
 
 
   return (
@@ -436,12 +458,13 @@ export default function AdminPage() {
       <main className="flex-1 bg-secondary">
         <section className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
           <Tabs defaultValue="about" className="mx-auto max-w-4xl">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="about">About</TabsTrigger>
                 <TabsTrigger value="products">Products</TabsTrigger>
                 <TabsTrigger value="gallery">Gallery</TabsTrigger>
                 <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
                 <TabsTrigger value="partners">Partners</TabsTrigger>
+                <TabsTrigger value="contact">Contact</TabsTrigger>
             </TabsList>
             <TabsContent value="about" className="pt-6">
                 <Card>
@@ -685,6 +708,44 @@ export default function AdminPage() {
                   </CardContent>
                 </Card>
             </TabsContent>
+             <TabsContent value="contact" className="pt-6">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle className="font-headline text-2xl">
+                                Contact Information
+                            </CardTitle>
+                            <CardDescription>
+                                Edit the contact details displayed on your site.
+                            </CardDescription>
+                        </div>
+                        <Button onClick={() => setIsContactInfoDialogOpen(true)} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!contactInfo}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Info
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        {contactInfo ? (
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="font-semibold">Address</h4>
+                                    <p className="text-sm text-muted-foreground">{contactInfo.address}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Phone</h4>
+                                    <p className="text-sm text-muted-foreground">{contactInfo.phone}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Email</h4>
+                                    <p className="text-sm text-muted-foreground">{contactInfo.email}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>Loading contact information...</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </TabsContent>
           </Tabs>
         </section>
       </main>
@@ -719,6 +780,14 @@ export default function AdminPage() {
             setIsOpen={setIsAboutDialogOpen}
             content={aboutContent}
             onSave={handleAboutSave}
+        />
+      )}
+       {contactInfo && (
+        <ContactInfoEditDialog
+            isOpen={isContactInfoDialogOpen}
+            setIsOpen={setIsContactInfoDialogOpen}
+            info={contactInfo}
+            onSave={handleContactInfoSave}
         />
       )}
     </div>
@@ -1310,4 +1379,60 @@ function AboutEditDialog({ isOpen, setIsOpen, content, onSave }: AboutEditDialog
     );
 }
 
-    
+interface ContactInfoEditDialogProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    info: ContactInfo;
+    onSave: (info: ContactInfo) => void;
+}
+
+function ContactInfoEditDialog({ isOpen, setIsOpen, info, onSave }: ContactInfoEditDialogProps) {
+    const [currentInfo, setCurrentInfo] = useState<ContactInfo>(info);
+
+    useEffect(() => {
+        if(isOpen) {
+            setCurrentInfo(info);
+        }
+    }, [isOpen, info]);
+
+    const handleInfoChange = (field: 'address' | 'phone' | 'email', value: string) => {
+        setCurrentInfo(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleSubmit = () => {
+        onSave(currentInfo);
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Edit Contact Information</DialogTitle>
+                    <DialogDescription>
+                        Update the contact details for your website.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="address" className="text-right">Address</Label>
+                        <Input id="address" value={currentInfo.address} onChange={(e) => handleInfoChange('address', e.target.value)} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="phone" className="text-right">Phone</Label>
+                        <Input id="phone" value={currentInfo.phone} onChange={(e) => handleInfoChange('phone', e.target.value)} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="email" className="text-right">Email</Label>
+                        <Input id="email" value={currentInfo.email} onChange={(e) => handleInfoChange('email', e.target.value)} className="col-span-3" />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
