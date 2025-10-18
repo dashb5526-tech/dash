@@ -33,6 +33,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getProducts, saveProducts, Product } from "@/lib/products";
 import { getGalleryImages, saveGalleryImages, GalleryImage } from "@/lib/gallery";
+import { getTestimonials, saveTestimonials, Testimonial } from "@/lib/testimonials";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
@@ -42,10 +43,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
+  const [isTestimonialDialogOpen, setIsTestimonialDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingGalleryImage, setEditingGalleryImage] = useState<GalleryImage | null>(null);
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
 
 
   const { toast } = useToast();
@@ -53,6 +57,7 @@ export default function AdminPage() {
   useEffect(() => {
     getProducts().then(setProducts);
     getGalleryImages().then(setGalleryImages);
+    getTestimonials().then(setTestimonials);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -224,6 +229,59 @@ export default function AdminPage() {
     }
   };
 
+  const openTestimonialDialogForNew = () => {
+    setEditingTestimonial(null);
+    setIsTestimonialDialogOpen(true);
+  };
+
+  const openTestimonialDialogForEdit = (testimonial: Testimonial) => {
+    setEditingTestimonial(testimonial);
+    setIsTestimonialDialogOpen(true);
+  };
+
+  const handleTestimonialSave = async (testimonialData: Testimonial) => {
+    try {
+      let updatedTestimonials;
+      if (editingTestimonial) {
+        updatedTestimonials = testimonials.map(t => t.id === editingTestimonial.id ? testimonialData : t);
+      } else {
+        updatedTestimonials = [...testimonials, { ...testimonialData, id: `testimonial-${Date.now()}` }];
+      }
+      setTestimonials(updatedTestimonials);
+      await saveTestimonials(updatedTestimonials);
+      toast({
+        title: "Changes Saved",
+        description: "Testimonial has been saved successfully.",
+      });
+      setIsTestimonialDialogOpen(false);
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Save Failed",
+        description: error.message || "Failed to save testimonial.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleTestimonialDelete = async (id: string) => {
+    try {
+      const updatedTestimonials = testimonials.filter(t => t.id !== id);
+      setTestimonials(updatedTestimonials);
+      await saveTestimonials(updatedTestimonials);
+      toast({
+        title: "Testimonial Deleted",
+        description: "Testimonial has been deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete testimonial.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
@@ -315,6 +373,53 @@ export default function AdminPage() {
                 </div>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="font-headline text-2xl">
+                    Testimonial Management
+                  </CardTitle>
+                  <CardDescription>
+                    Add, edit, or remove testimonials from your home page.
+                  </CardDescription>
+                </div>
+                <Button onClick={openTestimonialDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Testimonial
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Author Name</TableHead>
+                      <TableHead>Quote</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {testimonials.map((testimonial) => (
+                      <TableRow key={testimonial.id}>
+                        <TableCell className="font-medium">{testimonial.name}</TableCell>
+                        <TableCell className="text-muted-foreground truncate max-w-sm">{testimonial.quote}</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => openTestimonialDialogForEdit(testimonial)}>
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleTestimonialDelete(testimonial.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                             <span className="sr-only">Delete</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
           </div>
         </section>
       </main>
@@ -330,6 +435,12 @@ export default function AdminPage() {
         setIsOpen={setIsGalleryDialogOpen}
         image={editingGalleryImage}
         onSave={handleGallerySave}
+      />
+      <TestimonialEditDialog
+        isOpen={isTestimonialDialogOpen}
+        setIsOpen={setIsTestimonialDialogOpen}
+        testimonial={editingTestimonial}
+        onSave={handleTestimonialSave}
       />
     </div>
   );
@@ -559,6 +670,81 @@ function GalleryEditDialog({ isOpen, setIsOpen, image, onSave }: GalleryEditDial
                         </div>
                     </div>
                 </ScrollArea>
+                <DialogFooter>
+                    <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+interface TestimonialEditDialogProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    testimonial: Testimonial | null;
+    onSave: (testimonialData: Testimonial) => void;
+}
+
+function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: TestimonialEditDialogProps) {
+    const [name, setName] = useState("");
+    const [title, setTitle] = useState("");
+    const [quote, setQuote] = useState("");
+    const [id, setId] = useState("");
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (isOpen) {
+            if (testimonial) {
+                setName(testimonial.name);
+                setTitle(testimonial.title);
+                setQuote(testimonial.quote);
+                setId(testimonial.id);
+            } else {
+                setName("");
+                setTitle("");
+                setQuote("");
+                setId(`testimonial-${Date.now()}`);
+            }
+        }
+    }, [testimonial, isOpen]);
+
+    const handleSubmit = async () => {
+        if (!name || !title || !quote) {
+            toast({
+                title: "Missing Fields",
+                description: "Please fill out all fields before saving.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const testimonialData: Testimonial = { id, name, title, quote };
+        onSave(testimonialData);
+    }
+    
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{testimonial ? 'Edit Testimonial' : 'Add New Testimonial'}</DialogTitle>
+                    <DialogDescription>
+                        {testimonial ? 'Update the details for this testimonial.' : 'Fill in the details for the new testimonial.'}
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="testimonial-name" className="text-right">Author Name</Label>
+                        <Input id="testimonial-name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="testimonial-title" className="text-right">Author Title</Label>
+                        <Input id="testimonial-title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="testimonial-quote" className="text-right">Quote</Label>
+                        <Textarea id="testimonial-quote" value={quote} onChange={(e) => setQuote(e.target.value)} className="col-span-3" />
+                    </div>
+                </div>
                 <DialogFooter>
                     <Button type="button" onClick={handleSubmit}>Save Changes</Button>
                 </DialogFooter>

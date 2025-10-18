@@ -3,8 +3,8 @@
     {
       "id": "gallery-1",
       "description": "Farmer walking through a golden rice field during sunset",
-      "imageUrl": "https://images.unsplash.com/photo-1589746164246-8f32d747c43c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmYXJtZXIlMjBzdW5zZXR8ZW58MHx8fHwxNzYwNzcwNzkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "farmer sunset"
+      "imageHint": "farmer sunset",
+      "imageUrl": "/uploads/1760780229820_IMG-20251015-WA0002.jpg"
     },
     {
       "id": "gallery-2",
@@ -27,8 +27,8 @@
     {
       "id": "gallery-5",
       "description": "A steaming bowl of cooked white rice",
-      "imageUrl": "https://images.unsplash.com/photo-1516684732162-798a0062be99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjb29rZWQlMjByaWNlfGVufDB8fHx8MTc2MDc3MDc5M3ww&ixlib-rb-4.1.0&q=80&w=1080",
-      "imageHint": "cooked rice"
+      "imageHint": "cooked rice",
+      "imageUrl": "/uploads/1760780317778_IMG-20251015-WA0001.jpg"
     },
     {
       "id": "gallery-6",
@@ -47,6 +47,12 @@
       "description": "Close-up of a burlap sack with a custom brand label",
       "imageUrl": "https://images.unsplash.com/photo-1705147289789-6df2593f1b1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyaWNlJTIwYnJhbmRpbmd8ZW58MHx8fHwxNzYwNzcwNzkzfDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "rice branding"
+    },
+    {
+      "id": "gallery-1760780347656",
+      "description": "eeee",
+      "imageHint": "ddddd",
+      "imageUrl": "/uploads/1760780376538_IMG-20250922-WA0011.jpg"
     }
   ]
 }

@@ -1,5 +1,7 @@
+
+"use client";
+
 import Image from 'next/image';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Carousel,
   CarouselContent,
@@ -9,28 +11,19 @@ import {
 } from '@/components/ui/carousel';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Star } from 'lucide-react';
-
-const testimonials = [
-  {
-    quote: "Dash Rice Traders has been our most reliable supplier. Their Basmati rice is exceptional and our customers love it. Consistently high quality and always on time.",
-    name: "Priya Sharma",
-    title: "Owner, Spice Route Restaurant",
-  },
-  {
-    quote: "We switched to Dash Rice for our hotel chain's bulk needs and couldn't be happier. The pricing is competitive, and the quality of their Sona Masoori is unmatched.",
-    name: "Rajesh Kumar",
-    title: "Procurement Manager, Grand Hotels Group",
-  },
-  {
-    quote: "As a retailer, freshness and purity are key. Dash Rice delivers on both fronts. Their direct farm sourcing makes a noticeable difference. Highly recommended!",
-    name: "Anita Desai",
-    title: "Proprietor, Fresh Mart",
-  },
-];
+import { Card, CardContent } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { getTestimonials, Testimonial } from '@/lib/testimonials';
 
 const partnerLogos = PlaceHolderImages.filter(p => p.id.startsWith('partner-logo-'));
 
 export function Testimonials() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+
+  useEffect(() => {
+    getTestimonials().then(setTestimonials);
+  }, []);
+
   return (
     <section id="testimonials" className="bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
