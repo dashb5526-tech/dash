@@ -503,21 +503,23 @@ export default function AdminPage() {
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
       <main className="flex-1 bg-secondary">
-        <section className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        <section className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
           <Tabs defaultValue="home" className="mx-auto max-w-4xl">
-            <TabsList className="grid w-full grid-cols-7">
-                <TabsTrigger value="home">Home</TabsTrigger>
-                <TabsTrigger value="about">About</TabsTrigger>
-                <TabsTrigger value="products">Products</TabsTrigger>
-                <TabsTrigger value="gallery">Gallery</TabsTrigger>
-                <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
-                <TabsTrigger value="partners">Partners</TabsTrigger>
-                <TabsTrigger value="contact">Contact</TabsTrigger>
-            </TabsList>
+            <ScrollArea className="w-full whitespace-nowrap rounded-lg">
+                <TabsList className="inline-grid w-max grid-flow-col">
+                    <TabsTrigger value="home">Home</TabsTrigger>
+                    <TabsTrigger value="about">About</TabsTrigger>
+                    <TabsTrigger value="products">Products</TabsTrigger>
+                    <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                    <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
+                    <TabsTrigger value="partners">Partners</TabsTrigger>
+                    <TabsTrigger value="contact">Contact</TabsTrigger>
+                </TabsList>
+            </ScrollArea>
             <TabsContent value="home" className="pt-6">
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
+                    <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1">
                             <CardTitle className="font-headline text-2xl">
                                 Home Page Management
                             </CardTitle>
@@ -525,7 +527,7 @@ export default function AdminPage() {
                                 Edit the content of your home page.
                             </CardDescription>
                         </div>
-                        <Button onClick={() => setIsHomeDialogOpen(true)} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!homeContent}>
+                        <Button onClick={() => setIsHomeDialogOpen(true)} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!homeContent}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Content
                         </Button>
@@ -550,8 +552,8 @@ export default function AdminPage() {
             </TabsContent>
             <TabsContent value="about" className="pt-6">
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
+                    <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1">
                             <CardTitle className="font-headline text-2xl">
                                 About Page Management
                             </CardTitle>
@@ -559,7 +561,7 @@ export default function AdminPage() {
                                 Edit the content of your "About Us" page.
                             </CardDescription>
                         </div>
-                        <Button onClick={() => setIsAboutDialogOpen(true)} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!aboutContent}>
+                        <Button onClick={() => setIsAboutDialogOpen(true)} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!aboutContent}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Content
                         </Button>
@@ -584,8 +586,8 @@ export default function AdminPage() {
             </TabsContent>
             <TabsContent value="products" className="pt-6">
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
+                  <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex-1">
                       <CardTitle className="font-headline text-2xl">
                         Product Management
                       </CardTitle>
@@ -593,7 +595,7 @@ export default function AdminPage() {
                         Add, edit, or remove products from your store.
                       </CardDescription>
                     </div>
-                    <Button onClick={openProductDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                    <Button onClick={openProductDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Add Product
                     </Button>
@@ -603,7 +605,7 @@ export default function AdminPage() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Product Name</TableHead>
-                          <TableHead>Description</TableHead>
+                          <TableHead className="hidden sm:table-cell">Description</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -611,7 +613,7 @@ export default function AdminPage() {
                         {products.map((product) => (
                           <TableRow key={product.name}>
                             <TableCell className="font-medium">{product.name}</TableCell>
-                            <TableCell className="text-muted-foreground">{product.description}</TableCell>
+                            <TableCell className="hidden text-muted-foreground sm:table-cell">{product.description}</TableCell>
                             <TableCell className="text-right">
                               <Button variant="ghost" size="icon" onClick={() => openProductDialogForEdit(product)}>
                                 <Edit className="h-4 w-4" />
@@ -631,8 +633,8 @@ export default function AdminPage() {
             </TabsContent>
             <TabsContent value="gallery" className="pt-6">
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
+                  <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex-1">
                       <CardTitle className="font-headline text-2xl">
                         Gallery Management
                       </CardTitle>
@@ -640,7 +642,7 @@ export default function AdminPage() {
                         Add, edit, or remove images from your gallery.
                       </CardDescription>
                     </div>
-                    <Button onClick={openGalleryDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                    <Button onClick={openGalleryDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Add Image
                     </Button>
@@ -672,8 +674,8 @@ export default function AdminPage() {
             </TabsContent>
             <TabsContent value="testimonials" className="pt-6">
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
+                  <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex-1">
                       <CardTitle className="font-headline text-2xl">
                         Testimonial Management
                       </CardTitle>
@@ -681,7 +683,7 @@ export default function AdminPage() {
                         Add, edit, or remove testimonials from your home page.
                       </CardDescription>
                     </div>
-                    <Button onClick={openTestimonialDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                    <Button onClick={openTestimonialDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Add Testimonial
                     </Button>
@@ -691,8 +693,8 @@ export default function AdminPage() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Author</TableHead>
-                          <TableHead>Quote</TableHead>
-                          <TableHead>Rating</TableHead>
+                          <TableHead className="hidden sm:table-cell">Quote</TableHead>
+                          <TableHead className="hidden sm:table-cell">Rating</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -706,8 +708,8 @@ export default function AdminPage() {
                               </Avatar>
                               {testimonial.name}
                             </TableCell>
-                            <TableCell className="text-muted-foreground truncate max-w-sm">{testimonial.quote}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-muted-foreground truncate max-w-sm hidden sm:table-cell">{testimonial.quote}</TableCell>
+                            <TableCell className="hidden sm:table-cell">
                               <div className="flex items-center">
                                 {[...Array(5)].map((_, i) => (
                                   <Star
@@ -741,8 +743,8 @@ export default function AdminPage() {
             </TabsContent>
             <TabsContent value="partners" className="pt-6">
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
+                  <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex-1">
                       <CardTitle className="font-headline text-2xl">
                         Partner Management
                       </CardTitle>
@@ -750,7 +752,7 @@ export default function AdminPage() {
                         Manage your proud partner logos.
                       </CardDescription>
                     </div>
-                    <Button onClick={openPartnerDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                    <Button onClick={openPartnerDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Add Partner
                     </Button>
@@ -760,7 +762,7 @@ export default function AdminPage() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Partner Name</TableHead>
-                          <TableHead>Logo</TableHead>
+                          <TableHead className="hidden sm:table-cell">Logo</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -768,7 +770,7 @@ export default function AdminPage() {
                         {partners.map((partner) => (
                           <TableRow key={partner.id}>
                             <TableCell className="font-medium">{partner.name}</TableCell>
-                            <TableCell>
+                            <TableCell className="hidden sm:table-cell">
                               {partner.logoUrl && (
                                 <Image src={partner.logoUrl} alt={partner.name} width={100} height={40} className="object-contain" />
                               )}
@@ -792,8 +794,8 @@ export default function AdminPage() {
             </TabsContent>
              <TabsContent value="contact" className="pt-6">
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
+                    <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1">
                             <CardTitle className="font-headline text-2xl">
                                 Contact Information
                             </CardTitle>
@@ -801,7 +803,7 @@ export default function AdminPage() {
                                 Edit the contact details displayed on your site.
                             </CardDescription>
                         </div>
-                        <Button onClick={() => setIsContactInfoDialogOpen(true)} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!contactInfo}>
+                        <Button onClick={() => setIsContactInfoDialogOpen(true)} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!contactInfo}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Info
                         </Button>
