@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -47,9 +48,9 @@ export function Products() {
                   <CardTitle className="font-headline text-base sm:text-xl line-clamp-2">{product.name}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col p-4 pt-0">
-                  <CardDescription className="flex-1 text-xs sm:text-sm line-clamp-3 sm:line-clamp-none">{product.description}</CardDescription>
-                  <div className="mt-4 sm:mt-6">
-                    <Button asChild variant="outline" size="sm" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground sm:w-auto">
+                  <CardDescription className="flex-1 text-xs sm:text-sm line-clamp-3 sm:line-clamp-4">{product.description}</CardDescription>
+                  <div className="mt-4">
+                    <Button asChild variant="outline" size="sm" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
                         <Link href="/contact">Inquire for Pricing</Link>
                     </Button>
                   </div>
