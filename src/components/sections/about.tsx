@@ -3,9 +3,11 @@
 
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Package, Truck, Globe, Award } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getAboutContent, AboutContent, Service } from '@/lib/about';
+import { cn } from '@/lib/utils';
 
 const iconMap: { [key: string]: React.ReactNode } = {
   Truck: <Truck className="h-8 w-8 text-accent" />,
@@ -13,6 +15,32 @@ const iconMap: { [key: string]: React.ReactNode } = {
   Globe: <Globe className="h-8 w-8 text-accent" />,
   Award: <Award className="h-8 w-8 text-accent" />,
 };
+
+function ServiceCard({ service }: { service: Service }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <Card className="text-center flex flex-col">
+      <CardHeader>
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+          {iconMap[service.icon]}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2 flex flex-col flex-1">
+        <CardTitle className="font-headline text-xl">{service.title}</CardTitle>
+        <p className={cn("text-muted-foreground flex-1", !isExpanded && "line-clamp-3")}>
+            {service.description}
+        </p>
+        {service.description.length > 50 && (
+            <Button variant="link" size="sm" className="h-auto p-0 mt-1 text-accent justify-center text-xs" onClick={() => setIsExpanded(!isExpanded)}>
+                {isExpanded ? "Read less" : "Read more"}
+            </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 
 export function About() {
   const [content, setContent] = useState<AboutContent | null>(null);
@@ -65,17 +93,7 @@ export function About() {
         </h3>
         <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-4">
           {services.items.map((service) => (
-            <Card key={service.id} className="text-center">
-              <CardHeader>
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                  {iconMap[service.icon]}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <CardTitle className="font-headline text-xl">{service.title}</CardTitle>
-                <p className="text-muted-foreground">{service.description}</p>
-              </CardContent>
-            </Card>
+            <ServiceCard key={service.id} service={service} />
           ))}
         </div>
       </div>
