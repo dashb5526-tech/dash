@@ -11,15 +11,20 @@ import {
 } from '@/components/ui/carousel';
 import { Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getTestimonials, Testimonial } from '@/lib/testimonials';
 import { getPartners, Partner } from '@/lib/partners';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Autoplay from "embla-carousel-autoplay";
+
 
 export function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
+  const plugin = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: true })
+  );
 
   useEffect(() => {
     getTestimonials().then(setTestimonials);
@@ -40,11 +45,14 @@ export function Testimonials() {
 
         <div className="mt-16">
           <Carousel
+            plugins={[plugin.current]}
             opts={{
               align: "start",
               loop: true,
             }}
             className="w-full"
+            onMouseEnter={plugin.current.stop}
+            onMouseLeave={plugin.current.reset}
           >
             <CarouselContent>
               {testimonials.map((testimonial, index) => (
@@ -78,8 +86,8 @@ export function Testimonials() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious className="left-2 sm:-left-12"/>
+            <CarouselNext className="right-2 sm:-right-12"/>
           </Carousel>
         </div>
         
