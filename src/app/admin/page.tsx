@@ -43,6 +43,7 @@ import { PlusCircle, Edit, Trash2, Star } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 export default function AdminPage() {
@@ -434,246 +435,257 @@ export default function AdminPage() {
       <Header />
       <main className="flex-1 bg-secondary">
         <section className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl space-y-8">
-
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                        <CardTitle className="font-headline text-2xl">
-                            About Page Management
-                        </CardTitle>
-                        <CardDescription>
-                            Edit the content of your "About Us" page.
-                        </CardDescription>
-                    </div>
-                    <Button onClick={() => setIsAboutDialogOpen(true)} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!aboutContent}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Content
-                    </Button>
-                </CardHeader>
-                <CardContent>
-                    {aboutContent ? (
-                        <div className="space-y-4">
-                            <div>
-                                <h4 className="font-semibold">Main Content</h4>
-                                <p className="text-sm text-muted-foreground">{aboutContent.main.title}</p>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold">Services</h4>
-                                <p className="text-sm text-muted-foreground">{aboutContent.services.items.length} services listed.</p>
-                            </div>
+          <Tabs defaultValue="about" className="mx-auto max-w-4xl">
+            <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="about">About</TabsTrigger>
+                <TabsTrigger value="products">Products</TabsTrigger>
+                <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
+                <TabsTrigger value="partners">Partners</TabsTrigger>
+            </TabsList>
+            <TabsContent value="about" className="pt-6">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle className="font-headline text-2xl">
+                                About Page Management
+                            </CardTitle>
+                            <CardDescription>
+                                Edit the content of your "About Us" page.
+                            </CardDescription>
                         </div>
-                    ) : (
-                        <p>Loading about page content...</p>
-                    )}
-                </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="font-headline text-2xl">
-                    Product Management
-                  </CardTitle>
-                  <CardDescription>
-                    Add, edit, or remove products from your store.
-                  </CardDescription>
-                </div>
-                <Button onClick={openProductDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Product
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Product Name</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {products.map((product) => (
-                      <TableRow key={product.name}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell className="text-muted-foreground">{product.description}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => openProductDialogForEdit(product)}>
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleProductDelete(product.name)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                             <span className="sr-only">Delete</span>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="font-headline text-2xl">
-                    Gallery Management
-                  </CardTitle>
-                  <CardDescription>
-                    Add, edit, or remove images from your gallery.
-                  </CardDescription>
-                </div>
-                <Button onClick={openGalleryDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Image
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {galleryImages.map((image) => (
-                    <div key={image.id} className="relative group">
-                      <Image
-                        src={image.imageUrl}
-                        alt={image.description}
-                        width={200}
-                        height={200}
-                        className="rounded-lg object-cover aspect-square"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
-                          <Button variant="ghost" size="icon" onClick={() => openGalleryDialogForEdit(image)}>
-                            <Edit className="h-5 w-5 text-white" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleGalleryDelete(image.id)}>
-                            <Trash2 className="h-5 w-5 text-destructive" />
-                          </Button>
-                      </div>
+                        <Button onClick={() => setIsAboutDialogOpen(true)} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!aboutContent}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Content
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        {aboutContent ? (
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="font-semibold">Main Content</h4>
+                                    <p className="text-sm text-muted-foreground">{aboutContent.main.title}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Services</h4>
+                                    <p className="text-sm text-muted-foreground">{aboutContent.services.items.length} services listed.</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>Loading about page content...</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="products" className="pt-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="font-headline text-2xl">
+                        Product Management
+                      </CardTitle>
+                      <CardDescription>
+                        Add, edit, or remove products from your store.
+                      </CardDescription>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="font-headline text-2xl">
-                    Testimonial Management
-                  </CardTitle>
-                  <CardDescription>
-                    Add, edit, or remove testimonials from your home page.
-                  </CardDescription>
-                </div>
-                <Button onClick={openTestimonialDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Testimonial
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Author</TableHead>
-                      <TableHead>Quote</TableHead>
-                      <TableHead>Rating</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {testimonials.map((testimonial) => (
-                      <TableRow key={testimonial.id}>
-                        <TableCell className="font-medium flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={testimonial.authorImageUrl || undefined} alt={testimonial.name} />
-                            <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          {testimonial.name}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground truncate max-w-sm">{testimonial.quote}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={cn(
-                                  "h-4 w-4",
-                                  i < testimonial.rating
-                                    ? "text-accent fill-accent"
-                                    : "text-muted-foreground/50"
-                                )}
-                              />
-                            ))}
+                    <Button onClick={openProductDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Product
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Product Name</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {products.map((product) => (
+                          <TableRow key={product.name}>
+                            <TableCell className="font-medium">{product.name}</TableCell>
+                            <TableCell className="text-muted-foreground">{product.description}</TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="icon" onClick={() => openProductDialogForEdit(product)}>
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleProductDelete(product.name)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                                 <span className="sr-only">Delete</span>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="gallery" className="pt-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="font-headline text-2xl">
+                        Gallery Management
+                      </CardTitle>
+                      <CardDescription>
+                        Add, edit, or remove images from your gallery.
+                      </CardDescription>
+                    </div>
+                    <Button onClick={openGalleryDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Image
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {galleryImages.map((image) => (
+                        <div key={image.id} className="relative group">
+                          <Image
+                            src={image.imageUrl}
+                            alt={image.description}
+                            width={200}
+                            height={200}
+                            className="rounded-lg object-cover aspect-square"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                              <Button variant="ghost" size="icon" onClick={() => openGalleryDialogForEdit(image)}>
+                                <Edit className="h-5 w-5 text-white" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleGalleryDelete(image.id)}>
+                                <Trash2 className="h-5 w-5 text-destructive" />
+                              </Button>
                           </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => openTestimonialDialogForEdit(testimonial)}>
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleTestimonialDelete(testimonial.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                             <span className="sr-only">Delete</span>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="font-headline text-2xl">
-                    Partner Management
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your proud partner logos.
-                  </CardDescription>
-                </div>
-                <Button onClick={openPartnerDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Partner
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Partner Name</TableHead>
-                      <TableHead>Logo</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {partners.map((partner) => (
-                      <TableRow key={partner.id}>
-                        <TableCell className="font-medium">{partner.name}</TableCell>
-                        <TableCell>
-                          {partner.logoUrl && (
-                            <Image src={partner.logoUrl} alt={partner.name} width={100} height={40} className="object-contain" />
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => openPartnerDialogForEdit(partner)}>
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handlePartnerDelete(partner.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                             <span className="sr-only">Delete</span>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="testimonials" className="pt-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="font-headline text-2xl">
+                        Testimonial Management
+                      </CardTitle>
+                      <CardDescription>
+                        Add, edit, or remove testimonials from your home page.
+                      </CardDescription>
+                    </div>
+                    <Button onClick={openTestimonialDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Testimonial
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Author</TableHead>
+                          <TableHead>Quote</TableHead>
+                          <TableHead>Rating</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {testimonials.map((testimonial) => (
+                          <TableRow key={testimonial.id}>
+                            <TableCell className="font-medium flex items-center gap-3">
+                              <Avatar>
+                                <AvatarImage src={testimonial.authorImageUrl || undefined} alt={testimonial.name} />
+                                <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              {testimonial.name}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground truncate max-w-sm">{testimonial.quote}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={cn(
+                                      "h-4 w-4",
+                                      i < testimonial.rating
+                                        ? "text-accent fill-accent"
+                                        : "text-muted-foreground/50"
+                                    )}
+                                  />
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="icon" onClick={() => openTestimonialDialogForEdit(testimonial)}>
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleTestimonialDelete(testimonial.id)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                                 <span className="sr-only">Delete</span>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="partners" className="pt-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="font-headline text-2xl">
+                        Partner Management
+                      </CardTitle>
+                      <CardDescription>
+                        Manage your proud partner logos.
+                      </CardDescription>
+                    </div>
+                    <Button onClick={openPartnerDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Partner
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Partner Name</TableHead>
+                          <TableHead>Logo</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {partners.map((partner) => (
+                          <TableRow key={partner.id}>
+                            <TableCell className="font-medium">{partner.name}</TableCell>
+                            <TableCell>
+                              {partner.logoUrl && (
+                                <Image src={partner.logoUrl} alt={partner.name} width={100} height={40} className="object-contain" />
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="icon" onClick={() => openPartnerDialogForEdit(partner)}>
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handlePartnerDelete(partner.id)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                                 <span className="sr-only">Delete</span>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+            </TabsContent>
+          </Tabs>
         </section>
       </main>
       <Footer />
