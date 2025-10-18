@@ -27,7 +27,7 @@
     {
       "id": "parboiled-grain",
       "description": "Close-up of golden-hued Parboiled rice grains",
-      "imageUrl": "https://images.unsplash.com/photo-1586201375761-83865001e31c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwYXJib2lsZWQlMjByaWNlfGVufDB8fHx8MTc2MDc3MDc5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://storage.googleapis.com/aip-dev-user-uploads/a721c54e-e110-410e-8f20-b38466e3b2e7.png",
       "imageHint": "parboiled rice"
     },
     {
@@ -38,7 +38,7 @@
     },
     {
       "id": "broken-rice-grain",
-      "description": "Close-up of broken rice fragments",
+      "description": "Fragments of rice grains, broken during processing. An economical choice for various dishes and industries.",
       "imageUrl": "https://images.unsplash.com/photo-1705147289789-6df2593f1b1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxicm9rZW4lMjByaWNlfGVufDB8fHx8MTc2MDc3MDc5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "broken rice"
     },
@@ -69,7 +69,7 @@
     {
       "id": "gallery-5",
       "description": "A steaming bowl of cooked white rice",
-      "imageUrl": "https://images.unsplash.com/photo-1516684732162-798a0062be99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjb29rZWQlMjByaWNlfGVufDB8fHx8MTc2MDc3MDc5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1516684732162-798a0062be99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjb29rZWQlMjByaWNlfGVufDB8fHx8MTc2MDc3MDc5M3ww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "cooked rice"
     },
     {
@@ -87,7 +87,7 @@
     {
       "id": "gallery-8",
       "description": "Close-up of a burlap sack with a custom brand label",
-      "imageUrl": "https://images.unsplash.com/photo-1705147289789-6df2593f1b1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyaWNlJTIwYnJhbmRpbmd8ZW58MHx8fHwxNzYwNzcwNzkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1705147289789-6df2593f1b1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyaWNlJTIwYnJhbmRpbmd8ZW58MHx8fHwxNzYwNzcwNzkzfDA&ixlibrb-4.1.0&q=80&w=1080",
       "imageHint": "rice branding"
     },
     {
@@ -99,25 +99,25 @@
     {
       "id": "partner-logo-2",
       "description": "Logo for a partner company 'Royal Kitchen Hotels'",
-      "imageUrl": "https://images.unsplash.com/photo-1635934929590-1ff981bfaef3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxob3RlbCUyMGxvZ298ZW58MHx8fHwxNzYwNzcwNzkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1635934929590-1ff981bfaef3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxob3RlbCUyMGxvZ298ZW58MHx8fHwxNzYwNzcwNzkzfDA&ixlibrb-4.1.0&q=80&w=1080",
       "imageHint": "hotel logo"
     },
     {
       "id": "partner-logo-3",
       "description": "Logo for a partner company 'Global Exports Inc.'",
-      "imageUrl": "https://images.unsplash.com/photo-1654362238150-5616adaacc87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxleHBvcnQlMjBsb2dvfGVufDB8fHx8MTc2MDc3MDc5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1654362238150-5616adaacc87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxleHBvcnQlMjBsb2dvfGVufDB8fHx8MTc2MDc3MDc5M3ww&ixlibrb-4.1.0&q=80&w=1080",
       "imageHint": "export logo"
     },
     {
       "id": "partner-logo-4",
       "description": "Logo for a partner company 'Daily Needs Grocers'",
-      "imageUrl": "https://images.unsplash.com/photo-1707418838325-d035de0e72d9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxncm9jZXJ5JTIwbG9nb3xlbnwwfHx8fDE3NjA3NzA3OTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1707418838325-d035de0e72d9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxncm9jZXJ5JTIwbG9nb3xlbnwwfHx8fDE3NjA3NzA3OTN8MA&ixlibrb-4.1.0&q=80&w=1080",
       "imageHint": "grocery logo"
     },
     {
       "id": "map",
       "description": "A map showing the location of Cuttack, Odisha, India",
-      "imageUrl": "https://images.unsplash.com/photo-1568137223448-0708e0e4779c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFwJTIwQ3V0dGFja3xlbnwwfHx8fDE3NjA3NzA3OTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1568137223448-0708e0e4779c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFwJTIwQ3V0dGFja3xlbnwwfHx8fDE3NjA3NzA3OTN8MA&ixlibrb-4.1.0&q=80&w=1080",
       "imageHint": "map Cuttack"
     }
   ]
