@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { products as initialProducts } from "@/components/sections/products";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Image from 'next/image';
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
 
 type Product = typeof initialProducts[0];
@@ -43,6 +43,8 @@ export default function AdminPage() {
   const [products, setProducts] = useState(initialProducts);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  const { toast } = useToast();
 
   const openDialogForNew = () => {
     setEditingProduct(null);
@@ -150,8 +152,9 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [imageId, setImageId] = useState("");
+    const { toast } = useToast();
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (product) {
             setName(product.name);
             setDescription(product.description);
@@ -212,4 +215,3 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
         </Dialog>
     );
 }
-
