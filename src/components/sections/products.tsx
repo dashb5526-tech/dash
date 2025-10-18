@@ -29,10 +29,10 @@ function ProductCard({ product }: { product: Product }) {
             />
           </div>
         )}
-      <CardHeader className="p-4">
+      <CardHeader className="p-2 sm:p-4">
         <CardTitle className="font-headline text-base sm:text-xl line-clamp-2">{product.name}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-1 flex-col p-4 pt-0">
+      <CardContent className="flex flex-1 flex-col p-2 pt-0 sm:p-4 sm:pt-0">
         <CardDescription className={cn("flex-1 text-xs sm:text-sm", !isExpanded && "line-clamp-3 sm:line-clamp-4")}>
           {product.description}
         </CardDescription>
@@ -69,7 +69,7 @@ export function Products() {
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-16 grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.name} product={product} />
           ))}
