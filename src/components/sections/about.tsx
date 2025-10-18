@@ -63,7 +63,7 @@ export function About() {
         <h3 className="font-headline text-center text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           {services.title}
         </h3>
-        <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-4">
           {services.items.map((service) => (
             <Card key={service.id} className="text-center">
               <CardHeader>
