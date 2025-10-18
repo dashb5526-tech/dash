@@ -42,7 +42,7 @@ import { getHomeContent, saveHomeContent, HomeContent } from "@/lib/home";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -506,15 +506,16 @@ export default function AdminPage() {
         <section className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
           <Tabs defaultValue="home" className="mx-auto max-w-4xl">
             <ScrollArea className="w-full whitespace-nowrap rounded-lg">
-                <TabsList className="inline-grid w-max grid-flow-col">
-                    <TabsTrigger value="home">Home</TabsTrigger>
-                    <TabsTrigger value="about">About</TabsTrigger>
-                    <TabsTrigger value="products">Products</TabsTrigger>
-                    <TabsTrigger value="gallery">Gallery</TabsTrigger>
-                    <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
-                    <TabsTrigger value="partners">Partners</TabsTrigger>
-                    <TabsTrigger value="contact">Contact</TabsTrigger>
-                </TabsList>
+              <TabsList className="inline-flex w-auto">
+                <TabsTrigger value="home">Home</TabsTrigger>
+                <TabsTrigger value="about">About</TabsTrigger>
+                <TabsTrigger value="products">Products</TabsTrigger>
+                <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
+                <TabsTrigger value="partners">Partners</TabsTrigger>
+                <TabsTrigger value="contact">Contact</TabsTrigger>
+              </TabsList>
+              <ScrollBar orientation="horizontal" className="h-2" />
             </ScrollArea>
             <TabsContent value="home" className="pt-6">
                 <Card>
