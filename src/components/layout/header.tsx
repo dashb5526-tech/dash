@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { RiceBowl } from "@/components/icons";
@@ -63,6 +64,13 @@ export function Header() {
             <Link href="/contact">Order Now</Link>
           </Button>
 
+          <Link href="/admin" className="hidden md:inline-flex">
+            <Button variant="ghost" size="icon">
+              <Settings className="h-5 w-5" />
+              <span className="sr-only">Admin Settings</span>
+            </Button>
+          </Link>
+
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
@@ -95,6 +103,13 @@ export function Header() {
                       {section.name}
                     </Link>
                   ))}
+                   <Link
+                      href="/admin"
+                      className="text-lg font-medium text-foreground transition-colors hover:text-primary"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Admin
+                    </Link>
                 </nav>
                 <Button asChild className="w-full" size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                   <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>Order Now</Link>
