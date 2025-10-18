@@ -2,9 +2,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { RiceBowl } from "@/components/icons";
 import { useEffect, useState } from "react";
 import { getContactInfo, ContactInfo } from "@/lib/contact-info";
+import { getHomeContent, HomeContent } from "@/lib/home";
 
 const sections = [
   { name: "Home", href: "/" },
@@ -16,21 +18,27 @@ const sections = [
 
 export function Footer() {
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
 
   useEffect(() => {
     getContactInfo().then(setContactInfo);
+    getHomeContent().then(setHomeContent);
   }, []);
 
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between space-y-6 md:flex-row md:space-y-0">
-          <div className="flex items-center space-x-2">
-            <RiceBowl className="h-8 w-8 text-primary" />
+          <Link href="/" className="flex items-center gap-2">
+            {homeContent?.brand.logoUrl ? (
+                <Image src={homeContent.brand.logoUrl} alt={homeContent.brand.name} width={32} height={32} className="h-8 w-auto object-contain" />
+            ) : (
+                <RiceBowl className="h-8 w-8 text-primary" />
+            )}
             <span className="font-headline text-2xl font-semibold">
-              Dash Rice Traders
+              {homeContent?.brand.name || "Dash Rice Traders"}
             </span>
-          </div>
+          </Link>
           <nav className="flex flex-wrap justify-center gap-4 sm:gap-6">
             {sections.map((section) => (
               <Link
@@ -44,7 +52,7 @@ export function Footer() {
           </nav>
         </div>
         <div className="mt-8 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Dash Rice Traders. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {homeContent?.brand.name || "Dash Rice Traders"}. All rights reserved.</p>
           {contactInfo && (
             <p className="mt-1">
               {contactInfo.address} | {contactInfo.phone} | {contactInfo.email}
