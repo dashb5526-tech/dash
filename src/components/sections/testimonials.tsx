@@ -9,21 +9,21 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { getTestimonials, Testimonial } from '@/lib/testimonials';
+import { getPartners, Partner } from '@/lib/partners';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-const partnerLogos = PlaceHolderImages.filter(p => p.id.startsWith('partner-logo-'));
-
 export function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
 
   useEffect(() => {
     getTestimonials().then(setTestimonials);
+    getPartners().then(setPartners);
   }, []);
 
   return (
@@ -89,16 +89,17 @@ export function Testimonials() {
           </h3>
           <div className="mt-8 flow-root">
             <div className="-mt-4 -ml-8 flex flex-wrap justify-center lg:-ml-4">
-              {partnerLogos.map((logo) => (
-                <div key={logo.id} className="mt-4 ml-8 flex flex-shrink-0 flex-grow justify-center lg:ml-4 lg:flex-grow-0">
-                  <Image
-                    className="h-12 object-contain"
-                    src={logo.imageUrl}
-                    alt={logo.description}
-                    width={158}
-                    height={48}
-                    data-ai-hint={logo.imageHint}
-                  />
+              {partners.map((partner) => (
+                <div key={partner.id} className="mt-4 ml-8 flex flex-shrink-0 flex-grow justify-center lg:ml-4 lg:flex-grow-0">
+                  {partner.logoUrl && (
+                    <Image
+                      className="h-12 object-contain"
+                      src={partner.logoUrl}
+                      alt={partner.name}
+                      width={158}
+                      height={48}
+                    />
+                  )}
                 </div>
               ))}
             </div>

@@ -34,6 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getProducts, saveProducts, Product } from "@/lib/products";
 import { getGalleryImages, saveGalleryImages, GalleryImage } from "@/lib/gallery";
 import { getTestimonials, saveTestimonials, Testimonial } from "@/lib/testimonials";
+import { getPartners, savePartners, Partner } from "@/lib/partners";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star } from "lucide-react";
@@ -46,12 +47,17 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
+
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
   const [isTestimonialDialogOpen, setIsTestimonialDialogOpen] = useState(false);
+  const [isPartnerDialogOpen, setIsPartnerDialogOpen] = useState(false);
+
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingGalleryImage, setEditingGalleryImage] = useState<GalleryImage | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
 
 
   const { toast } = useToast();
@@ -60,6 +66,7 @@ export default function AdminPage() {
     getProducts().then(setProducts);
     getGalleryImages().then(setGalleryImages);
     getTestimonials().then(setTestimonials);
+    getPartners().then(setPartners);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -303,6 +310,78 @@ export default function AdminPage() {
     }
   };
 
+  const openPartnerDialogForNew = () => {
+    setEditingPartner(null);
+    setIsPartnerDialogOpen(true);
+  };
+
+  const openPartnerDialogForEdit = (partner: Partner) => {
+    setEditingPartner(partner);
+    setIsPartnerDialogOpen(true);
+  };
+
+  const handlePartnerSave = async (partnerData: Partner, selectedFile: File | null) => {
+    try {
+      let finalLogoUrl = partnerData.logoUrl;
+
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Image upload failed');
+        }
+        const result = await response.json();
+        finalLogoUrl = result.imageUrl;
+      }
+      
+      const newPartnerData = { ...partnerData, logoUrl: finalLogoUrl };
+
+      let updatedPartners;
+      if (editingPartner) {
+        updatedPartners = partners.map(p => p.id === editingPartner.id ? newPartnerData : p);
+      } else {
+        updatedPartners = [...partners, { ...newPartnerData, id: `partner-${Date.now()}` }];
+      }
+      setPartners(updatedPartners);
+      await savePartners(updatedPartners);
+      toast({
+        title: "Changes Saved",
+        description: "Partner has been saved successfully.",
+      });
+      setIsPartnerDialogOpen(false);
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Save Failed",
+        description: error.message || "Failed to save partner.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePartnerDelete = async (id: string) => {
+    try {
+      const updatedPartners = partners.filter(p => p.id !== id);
+      setPartners(updatedPartners);
+      await savePartners(updatedPartners);
+      toast({
+        title: "Partner Deleted",
+        description: "Partner has been deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete partner.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
@@ -463,6 +542,56 @@ export default function AdminPage() {
               </CardContent>
             </Card>
 
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="font-headline text-2xl">
+                    Partner Management
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your proud partner logos.
+                  </CardDescription>
+                </div>
+                <Button onClick={openPartnerDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Partner
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Partner Name</TableHead>
+                      <TableHead>Logo</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {partners.map((partner) => (
+                      <TableRow key={partner.id}>
+                        <TableCell className="font-medium">{partner.name}</TableCell>
+                        <TableCell>
+                          {partner.logoUrl && (
+                            <Image src={partner.logoUrl} alt={partner.name} width={100} height={40} className="object-contain" />
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => openPartnerDialogForEdit(partner)}>
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handlePartnerDelete(partner.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                             <span className="sr-only">Delete</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
           </div>
         </section>
       </main>
@@ -484,6 +613,12 @@ export default function AdminPage() {
         setIsOpen={setIsTestimonialDialogOpen}
         testimonial={editingTestimonial}
         onSave={handleTestimonialSave}
+      />
+      <PartnerEditDialog
+        isOpen={isPartnerDialogOpen}
+        setIsOpen={setIsPartnerDialogOpen}
+        partner={editingPartner}
+        onSave={handlePartnerSave}
       />
     </div>
   );
@@ -843,6 +978,110 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
                       </div>
                   </div>
                 </ScrollArea>
+                <DialogFooter>
+                    <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+interface PartnerEditDialogProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    partner: Partner | null;
+    onSave: (partnerData: Partner, selectedFile: File | null) => void;
+}
+
+function PartnerEditDialog({ isOpen, setIsOpen, partner, onSave }: PartnerEditDialogProps) {
+    const [id, setId] = useState("");
+    const [name, setName] = useState("");
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (isOpen) {
+            if (partner) {
+                setId(partner.id);
+                setName(partner.name);
+                setPreviewUrl(partner.logoUrl);
+            } else {
+                setId(`partner-${Date.now()}`);
+                setName("");
+                setPreviewUrl(null);
+            }
+            setSelectedFile(null);
+        }
+    }, [partner, isOpen]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB
+                toast({
+                    title: "File Too Large",
+                    description: "Please select an image smaller than 2MB.",
+                    variant: "destructive",
+                });
+                return;
+            }
+            setSelectedFile(file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!name) {
+            toast({
+                title: "Missing Name",
+                description: "Please enter the partner's name.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (!previewUrl && !selectedFile) {
+            toast({
+                title: "Missing Image",
+                description: "Please select a logo image.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const partnerData: Partner = { id, name, logoUrl: partner?.logoUrl || null };
+        onSave(partnerData, selectedFile);
+    }
+    
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{partner ? 'Edit Partner' : 'Add New Partner'}</DialogTitle>
+                    <DialogDescription>
+                        {partner ? 'Update the details for this partner.' : 'Fill in the details for the new partner.'}
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="partner-name" className="text-right">Partner Name</Label>
+                        <Input id="partner-name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label className="text-right">Partner Logo</Label>
+                      <div className="col-span-3">
+                          <input type="file" accept="image/*" onChange={handleFileChange} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+                          <p className="text-xs text-muted-foreground mt-2">Max file size: 2MB</p>
+                          {previewUrl && (
+                              <div className="mt-2">
+                                  <Image src={previewUrl} alt="Preview" width={100} height={40} className="object-contain rounded" />
+                              </div>
+                          )}
+                      </div>
+                    </div>
+                </div>
                 <DialogFooter>
                     <Button type="button" onClick={handleSubmit}>Save Changes</Button>
                 </DialogFooter>
