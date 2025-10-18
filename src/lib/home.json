@@ -1,0 +1,12 @@
+{
+  "brand": {
+    "name": "Dash Rice Traders",
+    "logoUrl": null
+  },
+  "hero": {
+    "headline": "From Our Farms to Your Table",
+    "subheadline": "Dash Rice Traders: Delivering pure, fresh, and trusted quality rice, sourced directly from the heart of India's farmlands.",
+    "imageUrl": "https://images.unsplash.com/photo-1604384041761-71d680147eb7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxyaWNlJTIwcGFkZHl8ZW58MHx8fHwxNzYwNzUxOTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageHint": "rice paddy"
+  }
+}

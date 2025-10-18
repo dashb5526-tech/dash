@@ -38,6 +38,7 @@ import { getTestimonials, saveTestimonials, Testimonial } from "@/lib/testimonia
 import { getPartners, savePartners, Partner } from "@/lib/partners";
 import { getAboutContent, saveAboutContent, AboutContent } from "@/lib/about";
 import { getContactInfo, saveContactInfo, ContactInfo } from "@/lib/contact-info";
+import { getHomeContent, saveHomeContent, HomeContent } from "@/lib/home";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star } from "lucide-react";
@@ -54,6 +55,7 @@ export default function AdminPage() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
@@ -61,6 +63,7 @@ export default function AdminPage() {
   const [isPartnerDialogOpen, setIsPartnerDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [isContactInfoDialogOpen, setIsContactInfoDialogOpen] = useState(false);
+  const [isHomeDialogOpen, setIsHomeDialogOpen] = useState(false);
 
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -78,6 +81,7 @@ export default function AdminPage() {
     getPartners().then(setPartners);
     getAboutContent().then(setAboutContent);
     getContactInfo().then(setContactInfo);
+    getHomeContent().then(setHomeContent);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -450,6 +454,49 @@ export default function AdminPage() {
             });
         }
     };
+    
+    const handleHomeSave = async (newHomeContent: HomeContent, files: { heroImage?: File | null, brandLogo?: File | null }) => {
+        try {
+            let heroImageUrl = newHomeContent.hero.imageUrl;
+            let brandLogoUrl = newHomeContent.brand.logoUrl;
+
+            if (files.heroImage) {
+                const formData = new FormData();
+                formData.append('file', files.heroImage);
+                const response = await fetch('/api/upload', { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Hero image upload failed');
+                heroImageUrl = (await response.json()).imageUrl;
+            }
+
+            if (files.brandLogo) {
+                const formData = new FormData();
+                formData.append('file', files.brandLogo);
+                const response = await fetch('/api/upload', { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Brand logo upload failed');
+                brandLogoUrl = (await response.json()).imageUrl;
+            }
+
+            const updatedContent: HomeContent = {
+                ...newHomeContent,
+                hero: { ...newHomeContent.hero, imageUrl: heroImageUrl },
+                brand: { ...newHomeContent.brand, logoUrl: brandLogoUrl },
+            };
+
+            setHomeContent(updatedContent);
+            await saveHomeContent(updatedContent);
+            toast({
+                title: "Changes Saved",
+                description: "Homepage content has been saved successfully.",
+            });
+            setIsHomeDialogOpen(false);
+        } catch (error: any) {
+            toast({
+                title: "Save Failed",
+                description: error.message || "Failed to save homepage content.",
+                variant: "destructive",
+            });
+        }
+    };
 
 
   return (
@@ -457,8 +504,9 @@ export default function AdminPage() {
       <Header />
       <main className="flex-1 bg-secondary">
         <section className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
-          <Tabs defaultValue="about" className="mx-auto max-w-4xl">
-            <TabsList className="grid w-full grid-cols-6">
+          <Tabs defaultValue="home" className="mx-auto max-w-4xl">
+            <TabsList className="grid w-full grid-cols-7">
+                <TabsTrigger value="home">Home</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
                 <TabsTrigger value="products">Products</TabsTrigger>
                 <TabsTrigger value="gallery">Gallery</TabsTrigger>
@@ -466,6 +514,40 @@ export default function AdminPage() {
                 <TabsTrigger value="partners">Partners</TabsTrigger>
                 <TabsTrigger value="contact">Contact</TabsTrigger>
             </TabsList>
+            <TabsContent value="home" className="pt-6">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle className="font-headline text-2xl">
+                                Home Page Management
+                            </CardTitle>
+                            <CardDescription>
+                                Edit the content of your home page.
+                            </CardDescription>
+                        </div>
+                        <Button onClick={() => setIsHomeDialogOpen(true)} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!homeContent}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Content
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        {homeContent ? (
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="font-semibold">Brand Name</h4>
+                                    <p className="text-sm text-muted-foreground">{homeContent.brand.name}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Hero Headline</h4>
+                                    <p className="text-sm text-muted-foreground">{homeContent.hero.headline}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>Loading home page content...</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </TabsContent>
             <TabsContent value="about" className="pt-6">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -790,6 +872,14 @@ export default function AdminPage() {
             onSave={handleContactInfoSave}
         />
       )}
+      {homeContent && (
+        <HomeEditDialog
+            isOpen={isHomeDialogOpen}
+            setIsOpen={setIsHomeDialogOpen}
+            content={homeContent}
+            onSave={handleHomeSave}
+        />
+        )}
     </div>
   );
 }
@@ -1429,6 +1519,113 @@ function ContactInfoEditDialog({ isOpen, setIsOpen, info, onSave }: ContactInfoE
                         <Input id="email" value={currentInfo.email} onChange={(e) => handleInfoChange('email', e.target.value)} className="col-span-3" />
                     </div>
                 </div>
+                <DialogFooter>
+                    <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+interface HomeEditDialogProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    content: HomeContent;
+    onSave: (content: HomeContent, files: { heroImage?: File | null, brandLogo?: File | null }) => void;
+}
+
+function HomeEditDialog({ isOpen, setIsOpen, content, onSave }: HomeEditDialogProps) {
+    const [currentContent, setCurrentContent] = useState<HomeContent>(content);
+    const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
+    const [brandLogoFile, setBrandLogoFile] = useState<File | null>(null);
+    const [heroPreviewUrl, setHeroPreviewUrl] = useState<string | null>(content.hero.imageUrl);
+    const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(content.brand.logoUrl);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if(isOpen) {
+            setCurrentContent(content);
+            setHeroPreviewUrl(content.hero.imageUrl);
+            setLogoPreviewUrl(content.brand.logoUrl);
+            setHeroImageFile(null);
+            setBrandLogoFile(null);
+        }
+    }, [isOpen, content]);
+
+    const handleContentChange = (section: 'brand' | 'hero', field: string, value: string) => {
+        setCurrentContent(prev => ({
+            ...prev,
+            [section]: { ...prev[section], [field]: value }
+        }));
+    };
+    
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'logo') => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const isLogo = type === 'logo';
+            const maxSize = isLogo ? 2 * 1024 * 1024 : 10 * 1024 * 1024; // 2MB for logo, 10MB for hero
+            if (file.size > maxSize) {
+                toast({ title: "File Too Large", description: `Please select an image smaller than ${isLogo ? '2MB' : '10MB'}.`, variant: "destructive" });
+                return;
+            }
+            if (isLogo) {
+                setBrandLogoFile(file);
+                setLogoPreviewUrl(URL.createObjectURL(file));
+            } else {
+                setHeroImageFile(file);
+                setHeroPreviewUrl(URL.createObjectURL(file));
+            }
+        }
+    };
+
+    const handleSubmit = () => {
+        onSave(currentContent, { heroImage: heroImageFile, brandLogo: brandLogoFile });
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>Edit Home Page Content</DialogTitle>
+                    <DialogDescription>
+                        Make changes to your homepage content and brand identity.
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-[75vh] pr-6">
+                    <div className="space-y-6 py-4">
+                        <h3 className="font-semibold text-lg border-b pb-2">Brand Identity</h3>
+                        <div className="grid gap-4">
+                            <Label>Brand Name</Label>
+                            <Input value={currentContent.brand.name} onChange={e => handleContentChange('brand', 'name', e.target.value)} />
+                        </div>
+                        <div className="grid gap-4">
+                            <Label>Brand Logo</Label>
+                            <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'logo')} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+                            <p className="text-xs text-muted-foreground mt-1">Max file size: 2MB</p>
+                            {logoPreviewUrl && <Image src={logoPreviewUrl} alt="Logo Preview" width={100} height={40} className="object-contain rounded mt-2" />}
+                        </div>
+
+                        <h3 className="font-semibold text-lg border-b pb-2 pt-6">Hero Section</h3>
+                        <div className="grid gap-4">
+                            <Label>Headline</Label>
+                            <Input value={currentContent.hero.headline} onChange={e => handleContentChange('hero', 'headline', e.target.value)} />
+                        </div>
+                        <div className="grid gap-4">
+                            <Label>Sub-headline</Label>
+                            <Textarea value={currentContent.hero.subheadline} onChange={e => handleContentChange('hero', 'subheadline', e.target.value)} rows={3}/>
+                        </div>
+                        <div className="grid gap-4">
+                            <Label>Background Image</Label>
+                            <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'hero')} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+                             <p className="text-xs text-muted-foreground mt-1">Max file size: 10MB</p>
+                            {heroPreviewUrl && <Image src={heroPreviewUrl} alt="Hero Preview" width={200} height={112} className="rounded object-cover mt-2" />}
+                        </div>
+                         <div className="grid gap-4">
+                            <Label>Image Hint</Label>
+                            <Input value={currentContent.hero.imageHint} onChange={e => handleContentChange('hero', 'imageHint', e.target.value)} />
+                        </div>
+                    </div>
+                </ScrollArea>
                 <DialogFooter>
                     <Button type="button" onClick={handleSubmit}>Save Changes</Button>
                 </DialogFooter>

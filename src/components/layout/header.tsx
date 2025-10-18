@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
 import { RiceBowl } from "@/components/icons";
 import { cn } from "@/lib/utils";
+import { getHomeContent, HomeContent } from "@/lib/home";
+import Image from "next/image";
 
 const sections = [
   { name: "Home", href: "/" },
@@ -21,12 +23,17 @@ const sections = [
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
+
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
+    
+    getHomeContent().then(setHomeContent);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -41,9 +48,13 @@ export function Header() {
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
-          <RiceBowl className="h-8 w-8 text-primary" />
+           {homeContent?.brand.logoUrl ? (
+              <Image src={homeContent.brand.logoUrl} alt={homeContent.brand.name} width={40} height={40} className="h-8 w-auto object-contain" />
+            ) : (
+              <RiceBowl className="h-8 w-8 text-primary" />
+            )}
           <span className="font-headline text-2xl font-bold text-foreground">
-            Dash Rice
+            {homeContent?.brand.name || "Dash Rice"}
           </span>
         </Link>
 
@@ -88,9 +99,13 @@ export function Header() {
               <div className="flex h-full flex-col">
                 <div className="flex items-center justify-between border-b pb-4">
                   <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
-                    <RiceBowl className="h-8 w-8 text-primary" />
+                    {homeContent?.brand.logoUrl ? (
+                      <Image src={homeContent.brand.logoUrl} alt={homeContent.brand.name} width={32} height={32} className="h-8 w-auto object-contain" />
+                    ) : (
+                      <RiceBowl className="h-8 w-8 text-primary" />
+                    )}
                     <span className="font-headline text-xl font-bold text-foreground">
-                      Dash Rice Traders
+                      {homeContent?.brand.name || "Dash Rice Traders"}
                     </span>
                   </Link>
                   <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
