@@ -1,17 +1,13 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { Hero } from "@/components/sections/hero";
-import { Gallery } from "@/components/sections/gallery";
-import { Testimonials } from "@/components/sections/testimonials";
+import { About } from "@/components/sections/about";
 
-export default function Home() {
+export default function AboutPage() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
       <main className="flex-1">
-        <Hero />
-        <Gallery />
-        <Testimonials />
+        <About />
       </main>
       <Footer />
     </div>

@@ -3,7 +3,7 @@ import { RiceBowl } from "@/components/icons";
 
 const sections = [
   { name: "Home", href: "/" },
-  { name: "About Us", href: "/#about" },
+  { name: "About Us", href: "/about" },
   { name: "Products", href: "/products" },
   { name: "Gallery", href: "/#gallery" },
   { name: "Contact", href: "/contact" },
