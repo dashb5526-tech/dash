@@ -4,6 +4,7 @@ export interface Testimonial {
   quote: string;
   name: string;
   title: string;
+  rating: number;
 }
 
 export async function getTestimonials(): Promise<Testimonial[]> {

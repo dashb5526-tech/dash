@@ -14,6 +14,7 @@ import { Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { getTestimonials, Testimonial } from '@/lib/testimonials';
+import { cn } from '@/lib/utils';
 
 const partnerLogos = PlaceHolderImages.filter(p => p.id.startsWith('partner-logo-'));
 
@@ -51,7 +52,15 @@ export function Testimonials() {
                     <Card className="h-full">
                       <CardContent className="flex h-full flex-col items-center justify-center p-6 text-center">
                         <div className="flex text-accent">
-                          {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 fill-current" />)}
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              className={cn(
+                                "h-5 w-5",
+                                i < testimonial.rating ? "fill-current" : "text-gray-300"
+                              )} 
+                            />
+                          ))}
                         </div>
                         <p className="mt-4 flex-1 text-muted-foreground">"{testimonial.quote}"</p>
                         <div className="mt-4">

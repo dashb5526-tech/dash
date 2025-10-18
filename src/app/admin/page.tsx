@@ -36,8 +36,9 @@ import { getGalleryImages, saveGalleryImages, GalleryImage } from "@/lib/gallery
 import { getTestimonials, saveTestimonials, Testimonial } from "@/lib/testimonials";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Star } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 
 export default function AdminPage() {
@@ -395,6 +396,7 @@ export default function AdminPage() {
                     <TableRow>
                       <TableHead>Author Name</TableHead>
                       <TableHead>Quote</TableHead>
+                      <TableHead>Rating</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -403,6 +405,21 @@ export default function AdminPage() {
                       <TableRow key={testimonial.id}>
                         <TableCell className="font-medium">{testimonial.name}</TableCell>
                         <TableCell className="text-muted-foreground truncate max-w-sm">{testimonial.quote}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={cn(
+                                  "h-4 w-4",
+                                  i < testimonial.rating
+                                    ? "text-accent fill-accent"
+                                    : "text-muted-foreground/50"
+                                )}
+                              />
+                            ))}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" onClick={() => openTestimonialDialogForEdit(testimonial)}>
                             <Edit className="h-4 w-4" />
@@ -689,6 +706,7 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
     const [name, setName] = useState("");
     const [title, setTitle] = useState("");
     const [quote, setQuote] = useState("");
+    const [rating, setRating] = useState(5);
     const [id, setId] = useState("");
     const { toast } = useToast();
 
@@ -698,11 +716,13 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
                 setName(testimonial.name);
                 setTitle(testimonial.title);
                 setQuote(testimonial.quote);
+                setRating(testimonial.rating);
                 setId(testimonial.id);
             } else {
                 setName("");
                 setTitle("");
                 setQuote("");
+                setRating(5);
                 setId(`testimonial-${Date.now()}`);
             }
         }
@@ -718,7 +738,7 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
             return;
         }
 
-        const testimonialData: Testimonial = { id, name, title, quote };
+        const testimonialData: Testimonial = { id, name, title, quote, rating };
         onSave(testimonialData);
     }
     
@@ -739,6 +759,21 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="testimonial-title" className="text-right">Author Title</Label>
                         <Input id="testimonial-title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="testimonial-rating" className="text-right">Rating</Label>
+                        <div className="col-span-3 flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                                <Star
+                                    key={i}
+                                    className={cn(
+                                        "h-6 w-6 cursor-pointer",
+                                        i < rating ? "text-accent fill-accent" : "text-muted-foreground/50"
+                                    )}
+                                    onClick={() => setRating(i + 1)}
+                                />
+                            ))}
+                        </div>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="testimonial-quote" className="text-right">Quote</Label>
