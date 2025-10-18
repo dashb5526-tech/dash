@@ -1,9 +1,16 @@
-import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+"use client";
 
-const galleryImages = PlaceHolderImages.filter(p => p.id.startsWith('gallery-'));
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { getGalleryImages, GalleryImage } from '@/lib/gallery';
 
 export function Gallery() {
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+
+  useEffect(() => {
+    getGalleryImages().then(setGalleryImages);
+  }, []);
+
   return (
     <section id="gallery" className="bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

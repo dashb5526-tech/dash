@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getProducts, saveProducts, Product } from "@/lib/products";
+import { getGalleryImages, saveGalleryImages, GalleryImage } from "@/lib/gallery";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
@@ -40,26 +41,31 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
+  const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingGalleryImage, setEditingGalleryImage] = useState<GalleryImage | null>(null);
+
 
   const { toast } = useToast();
 
   useEffect(() => {
     getProducts().then(setProducts);
+    getGalleryImages().then(setGalleryImages);
   }, []);
 
-  const openDialogForNew = () => {
+  const openProductDialogForNew = () => {
     setEditingProduct(null);
-    setIsDialogOpen(true);
+    setIsProductDialogOpen(true);
   };
 
-  const openDialogForEdit = (product: Product) => {
+  const openProductDialogForEdit = (product: Product) => {
     setEditingProduct(product);
-    setIsDialogOpen(true);
+    setIsProductDialogOpen(true);
   };
   
-  const handleSaveChanges = async (productData: Product, selectedFile: File | null) => {
+  const handleProductSave = async (productData: Product, selectedFile: File | null) => {
     try {
       let finalImageUrl = productData.imageUrl;
 
@@ -105,7 +111,7 @@ export default function AdminPage() {
         title: "Changes Saved",
         description: "Product has been saved successfully.",
       });
-      setIsDialogOpen(false);
+      setIsProductDialogOpen(false);
     } catch (error: any) {
       console.error(error);
       toast({
@@ -116,7 +122,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleDelete = async (productName: string) => {
+  const handleProductDelete = async (productName: string) => {
     try {
       const updatedProducts = products.filter(p => p.name !== productName);
       setProducts(updatedProducts);
@@ -134,12 +140,96 @@ export default function AdminPage() {
     }
   }
 
+  const openGalleryDialogForNew = () => {
+    setEditingGalleryImage(null);
+    setIsGalleryDialogOpen(true);
+  };
+
+  const openGalleryDialogForEdit = (image: GalleryImage) => {
+    setEditingGalleryImage(image);
+    setIsGalleryDialogOpen(true);
+  };
+
+  const handleGallerySave = async (imageData: Omit<GalleryImage, 'imageUrl'>, selectedFile: File | null) => {
+    try {
+      let finalImageUrl = editingGalleryImage?.imageUrl || "";
+
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Upload failed: ${errorText}`);
+        }
+
+        const result = await response.json();
+        finalImageUrl = result.imageUrl;
+      }
+      
+      if (!finalImageUrl) {
+        toast({
+            title: "Save Failed",
+            description: "An image is required.",
+            variant: "destructive",
+        });
+        return;
+      }
+
+      const newImageData = { ...imageData, imageUrl: finalImageUrl };
+
+      let updatedImages;
+      if (editingGalleryImage) {
+        updatedImages = galleryImages.map(img => img.id === editingGalleryImage.id ? newImageData : img);
+      } else {
+        updatedImages = [...galleryImages, newImageData];
+      }
+      setGalleryImages(updatedImages);
+      await saveGalleryImages(updatedImages);
+      toast({
+        title: "Changes Saved",
+        description: "Gallery image has been saved successfully.",
+      });
+      setIsGalleryDialogOpen(false);
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Save Failed",
+        description: error.message || "Failed to save gallery image.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGalleryDelete = async (id: string) => {
+    try {
+      const updatedImages = galleryImages.filter(img => img.id !== id);
+      setGalleryImages(updatedImages);
+      await saveGalleryImages(updatedImages);
+      toast({
+        title: "Image Deleted",
+        description: "Gallery image has been deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete gallery image.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
       <main className="flex-1 bg-secondary">
         <section className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto max-w-4xl space-y-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
@@ -150,7 +240,7 @@ export default function AdminPage() {
                     Add, edit, or remove products from your store.
                   </CardDescription>
                 </div>
-                <Button onClick={openDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                <Button onClick={openProductDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Add Product
                 </Button>
@@ -170,11 +260,11 @@ export default function AdminPage() {
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell className="text-muted-foreground">{product.description}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => openDialogForEdit(product)}>
+                          <Button variant="ghost" size="icon" onClick={() => openProductDialogForEdit(product)}>
                             <Edit className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(product.name)}>
+                          <Button variant="ghost" size="icon" onClick={() => handleProductDelete(product.name)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                              <span className="sr-only">Delete</span>
                           </Button>
@@ -185,15 +275,61 @@ export default function AdminPage() {
                 </Table>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="font-headline text-2xl">
+                    Gallery Management
+                  </CardTitle>
+                  <CardDescription>
+                    Add, edit, or remove images from your gallery.
+                  </CardDescription>
+                </div>
+                <Button onClick={openGalleryDialogForNew} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Image
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {galleryImages.map((image) => (
+                    <div key={image.id} className="relative group">
+                      <Image
+                        src={image.imageUrl}
+                        alt={image.description}
+                        width={200}
+                        height={200}
+                        className="rounded-lg object-cover aspect-square"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                          <Button variant="ghost" size="icon" onClick={() => openGalleryDialogForEdit(image)}>
+                            <Edit className="h-5 w-5 text-white" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleGalleryDelete(image.id)}>
+                            <Trash2 className="h-5 w-5 text-destructive" />
+                          </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </section>
       </main>
       <Footer />
       <ProductEditDialog 
-        isOpen={isDialogOpen}
-        setIsOpen={setIsDialogOpen}
+        isOpen={isProductDialogOpen}
+        setIsOpen={setIsProductDialogOpen}
         product={editingProduct}
-        onSave={handleSaveChanges}
+        onSave={handleProductSave}
+      />
+      <GalleryEditDialog
+        isOpen={isGalleryDialogOpen}
+        setIsOpen={setIsGalleryDialogOpen}
+        image={editingGalleryImage}
+        onSave={handleGallerySave}
       />
     </div>
   );
@@ -215,18 +351,20 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
     const { toast } = useToast();
 
     useEffect(() => {
-        if (product) {
-            setName(product.name);
-            setDescription(product.description);
-            setImageId(product.imageId);
-            setPreviewUrl(product.imageUrl);
-        } else {
-            setName("");
-            setDescription("");
-            setImageId("");
-            setPreviewUrl(null);
+        if (isOpen) {
+            if (product) {
+                setName(product.name);
+                setDescription(product.description);
+                setImageId(product.imageId);
+                setPreviewUrl(product.imageUrl);
+            } else {
+                setName("");
+                setDescription("");
+                setImageId("");
+                setPreviewUrl(null);
+            }
+            setSelectedFile(null);
         }
-        setSelectedFile(null);
     }, [product, isOpen]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -260,7 +398,7 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
             name,
             description,
             imageId,
-            imageUrl: product?.imageUrl || null
+            imageUrl: product?.imageUrl || previewUrl
         };
         
         onSave(productData, selectedFile);
@@ -311,4 +449,120 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
     );
 }
 
-    
+interface GalleryEditDialogProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    image: GalleryImage | null;
+    onSave: (imageData: Omit<GalleryImage, 'imageUrl'>, selectedFile: File | null) => void;
+}
+
+function GalleryEditDialog({ isOpen, setIsOpen, image, onSave }: GalleryEditDialogProps) {
+    const [id, setId] = useState("");
+    const [description, setDescription] = useState("");
+    const [imageHint, setImageHint] = useState("");
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (isOpen) {
+            if (image) {
+                setId(image.id);
+                setDescription(image.description);
+                setImageHint(image.imageHint);
+                setPreviewUrl(image.imageUrl);
+            } else {
+                // Generate a new unique ID for a new image
+                setId(`gallery-${Date.now()}`);
+                setDescription("");
+                setImageHint("");
+                setPreviewUrl(null);
+            }
+            setSelectedFile(null);
+        }
+    }, [image, isOpen]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                toast({
+                    title: "File Too Large",
+                    description: "Please select an image smaller than 10MB.",
+                    variant: "destructive",
+                });
+                return;
+            }
+            setSelectedFile(file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!id || !description) {
+            toast({
+                title: "Missing Fields",
+                description: "Please fill out ID and Description before saving.",
+                variant: "destructive",
+            });
+            return;
+        }
+        
+        if (!previewUrl && !selectedFile) {
+            toast({
+                title: "Missing Image",
+                description: "Please select an image before saving.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const imageData = { id, description, imageHint };
+        onSave(imageData, selectedFile);
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{image ? 'Edit Gallery Image' : 'Add New Gallery Image'}</DialogTitle>
+                    <DialogDescription>
+                        {image ? 'Update the details for this image.' : 'Fill in the details for the new image.'}
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-[60vh] pr-6">
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="gallery-id" className="text-right">ID</Label>
+                            <Input id="gallery-id" value={id} onChange={(e) => setId(e.target.value)} className="col-span-3" disabled={!!image} />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="gallery-description" className="text-right">Description</Label>
+                            <Textarea id="gallery-description" value={description} onChange={(e) => setDescription(e.target.value)} className="col-span-3" />
+                        </div>
+                         <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="gallery-hint" className="text-right">Image Hint</Label>
+                            <Input id="gallery-hint" value={imageHint} onChange={(e) => setImageHint(e.target.value)} className="col-span-3" placeholder="e.g., rice paddy" />
+                        </div>
+                         <div className="grid grid-cols-4 items-center gap-4">
+                            <Label className="text-right">Image</Label>
+                            <div className="col-span-3">
+                                <input type="file" accept="image/*" onChange={handleFileChange} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+                                <p className="text-xs text-muted-foreground mt-2">Max file size: 10MB</p>
+                                {previewUrl && (
+                                    <div className="mt-2">
+                                        <Image src={previewUrl} alt="Preview" width={100} height={100} className="object-cover rounded" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </ScrollArea>
+                <DialogFooter>
+                    <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
