@@ -59,15 +59,45 @@ export default function AdminPage() {
     setIsDialogOpen(true);
   };
   
-  const handleSaveChanges = async (productData: Product) => {
+  const handleSaveChanges = async (productData: Product, selectedFile: File | null) => {
     try {
+      let finalImageUrl = productData.imageUrl;
+
+      if (selectedFile) {
+          const formData = new FormData();
+          formData.append('file', selectedFile);
+
+          const response = await fetch('/api/upload', {
+              method: 'POST',
+              body: formData,
+          });
+
+          if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`Upload failed: ${errorText}`);
+          }
+
+          const result = await response.json();
+          finalImageUrl = result.imageUrl;
+      }
+
+      const newProductData = { ...productData, imageUrl: finalImageUrl };
+
       let updatedProducts;
       if (editingProduct) {
         // Update existing product
-        updatedProducts = products.map(p => p.name === editingProduct.name ? productData : p);
+        updatedProducts = products.map(p => p.name === editingProduct.name ? newProductData : p);
       } else {
         // Add new product
-        updatedProducts = [...products, productData];
+        if (products.find(p => p.name === newProductData.name)) {
+          toast({
+            title: "Save Failed",
+            description: "A product with this name already exists.",
+            variant: "destructive",
+          });
+          return;
+        }
+        updatedProducts = [...products, newProductData];
       }
       setProducts(updatedProducts);
       await saveProducts(updatedProducts);
@@ -75,14 +105,15 @@ export default function AdminPage() {
         title: "Changes Saved",
         description: "Product has been saved successfully.",
       });
-    } catch (error) {
+      setIsDialogOpen(false);
+    } catch (error: any) {
+      console.error(error);
       toast({
         title: "Save Failed",
-        description: "Failed to save product changes.",
+        description: error.message || "Failed to save product changes.",
         variant: "destructive",
       });
     }
-    setIsDialogOpen(false);
   };
 
   const handleDelete = async (productName: string) => {
@@ -172,14 +203,13 @@ interface ProductEditDialogProps {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
     product: Product | null;
-    onSave: (productData: Product) => void;
+    onSave: (productData: Product, selectedFile: File | null) => void;
 }
 
 function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDialogProps) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [imageId, setImageId] = useState("");
-    const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const { toast } = useToast();
@@ -189,13 +219,11 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
             setName(product.name);
             setDescription(product.description);
             setImageId(product.imageId);
-            setImageUrl(product.imageUrl);
             setPreviewUrl(product.imageUrl);
         } else {
             setName("");
             setDescription("");
             setImageId("");
-            setImageUrl(null);
             setPreviewUrl(null);
         }
         setSelectedFile(null);
@@ -228,35 +256,14 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
             return;
         }
 
-        let finalImageUrl = imageUrl;
-
-        if (selectedFile) {
-            try {
-                const formData = new FormData();
-                formData.append('file', selectedFile);
-
-                const response = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (!response.ok) {
-                    throw new Error('Upload failed');
-                }
-
-                const result = await response.json();
-                finalImageUrl = result.imageUrl;
-            } catch (error) {
-                toast({
-                    title: "Upload Failed",
-                    description: "Failed to upload image. Please try again.",
-                    variant: "destructive",
-                });
-                return;
-            }
-        }
-
-        onSave({ name, description, imageId, imageUrl: finalImageUrl });
+        const productData: Product = {
+            name,
+            description,
+            imageId,
+            imageUrl: product?.imageUrl || null
+        };
+        
+        onSave(productData, selectedFile);
     }
     
     return (
@@ -272,7 +279,7 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right">Name</Label>
-                            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+                            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" disabled={!!product} />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="description" className="text-right">Description</Label>
@@ -303,3 +310,5 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
         </Dialog>
     );
 }
+
+    
