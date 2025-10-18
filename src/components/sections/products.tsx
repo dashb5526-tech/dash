@@ -36,7 +36,7 @@ function ProductCard({ product }: { product: Product }) {
         <CardDescription className={cn("flex-1 text-xs sm:text-sm", !isExpanded && "line-clamp-3 sm:line-clamp-4")}>
           {product.description}
         </CardDescription>
-        {product.description.length > 100 && ( // Heuristic to decide if Read More is needed
+        {product.description.length > 50 && ( // Heuristic to decide if Read More is needed
             <Button variant="link" size="sm" className="h-auto p-0 mt-1 text-accent justify-start text-xs" onClick={() => setIsExpanded(!isExpanded)}>
                 {isExpanded ? "Read less" : "Read more"}
             </Button>
@@ -69,7 +69,7 @@ export function Products() {
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+        <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.name} product={product} />
           ))}
