@@ -32,7 +32,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getProducts, saveProducts, Product } from "@/lib/products";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
@@ -304,6 +303,3 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
         </Dialog>
     );
 }
-
-
-    
