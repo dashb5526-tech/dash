@@ -3,6 +3,8 @@ export interface ContactInfo {
   phone: string;
   email: string;
   whatsappNumber: string;
+  imageUrl: string;
+  imageHint: string;
 }
 
 export async function getContactInfo(): Promise<ContactInfo | null> {

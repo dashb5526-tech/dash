@@ -27,7 +27,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { submitForm } from "@/lib/actions";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getProducts, Product } from "@/lib/products";
 import { getContactInfo, ContactInfo } from "@/lib/contact-info";
 import { getContactSection, ContactSection } from "@/lib/contact-section";
@@ -48,8 +47,6 @@ const orderFormSchema = z.object({
   quantity: z.string().min(1, "Please specify a quantity."),
   message: z.string().optional(),
 });
-
-const mapImage = PlaceHolderImages.find(p => p.id === 'map');
 
 export function Contact() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -118,15 +115,15 @@ export function Contact() {
                     <p>Loading contact information...</p>
                 )}
             </div>
-            {mapImage && (
+            {contactInfo?.imageUrl && (
               <div className="overflow-hidden rounded-lg shadow-lg">
                 <Image
-                  src={mapImage.imageUrl}
-                  alt={mapImage.description}
+                  src={contactInfo.imageUrl}
+                  alt={contactInfo.imageHint}
                   width={800}
                   height={600}
                   className="h-full w-full object-cover"
-                  data-ai-hint={mapImage.imageHint}
+                  data-ai-hint={contactInfo.imageHint}
                 />
               </div>
             )}

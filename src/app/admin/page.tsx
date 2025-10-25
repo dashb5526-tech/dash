@@ -511,10 +511,26 @@ export default function AdminPage() {
     }
   };
   
-    const handleContactInfoSave = async (newContactInfo: ContactInfo) => {
+    const handleContactInfoSave = async (newContactInfo: ContactInfo, selectedFile: File | null) => {
         try {
-            setContactInfo(newContactInfo);
-            await saveContactInfo(newContactInfo);
+            let finalImageUrl = newContactInfo.imageUrl;
+
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (!response.ok) throw new Error('Image upload failed');
+                const result = await response.json();
+                finalImageUrl = result.imageUrl;
+            }
+
+            const updatedInfo = { ...newContactInfo, imageUrl: finalImageUrl };
+
+            setContactInfo(updatedInfo);
+            await saveContactInfo(updatedInfo);
             toast({
                 title: "Changes Saved",
                 description: "Contact information has been saved successfully.",
@@ -1818,56 +1834,86 @@ interface ContactInfoEditDialogProps {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
     info: ContactInfo;
-    onSave: (info: ContactInfo) => void;
+    onSave: (info: ContactInfo, selectedFile: File | null) => void;
 }
 
 function ContactInfoEditDialog({ isOpen, setIsOpen, info, onSave }: ContactInfoEditDialogProps) {
     const [currentInfo, setCurrentInfo] = useState<ContactInfo>(info);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(info.imageUrl);
+    const { toast } = useToast();
 
     useEffect(() => {
         if(isOpen) {
             setCurrentInfo(info);
+            setPreviewUrl(info.imageUrl);
+            setSelectedFile(null);
         }
     }, [isOpen, info]);
 
-    const handleInfoChange = (field: 'address' | 'phone' | 'email' | 'whatsappNumber', value: string) => {
+    const handleInfoChange = (field: keyof Omit<ContactInfo, 'imageUrl'>, value: string) => {
         setCurrentInfo(prev => ({
             ...prev,
             [field]: value
         }));
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                toast({ title: "File Too Large", description: "Please select an image smaller than 10MB.", variant: "destructive" });
+                return;
+            }
+            setSelectedFile(file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+        }
+    };
+
     const handleSubmit = () => {
-        onSave(currentInfo);
+        onSave(currentInfo, selectedFile);
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Edit Contact Information</DialogTitle>
                     <DialogDescription>
-                        Update the contact details for your website.
+                        Update the contact details and map image for your website.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="address" className="text-right">Address</Label>
-                        <Input id="address" value={currentInfo.address} onChange={(e) => handleInfoChange('address', e.target.value)} className="col-span-3" />
+                <ScrollArea className="h-[70vh] pr-6">
+                    <div className="grid gap-6 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="address">Address</Label>
+                            <Input id="address" value={currentInfo.address} onChange={(e) => handleInfoChange('address', e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="phone">Phone</Label>
+                            <Input id="phone" value={currentInfo.phone} onChange={(e) => handleInfoChange('phone', e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input id="email" value={currentInfo.email} onChange={(e) => handleInfoChange('email', e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="whatsappNumber">WhatsApp No.</Label>
+                            <Input id="whatsappNumber" value={currentInfo.whatsappNumber} onChange={(e) => handleInfoChange('whatsappNumber', e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Map Image</Label>
+                            <input type="file" accept="image/*" onChange={handleFileChange} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+                            <p className="text-xs text-muted-foreground mt-1">Max file size: 10MB</p>
+                            {previewUrl && <Image src={previewUrl} alt="Map Preview" width={200} height={150} className="rounded object-cover mt-2" />}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="imageHint">Map Image Hint</Label>
+                            <Input id="imageHint" value={currentInfo.imageHint} onChange={(e) => handleInfoChange('imageHint', e.target.value)} />
+                        </div>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="phone" className="text-right">Phone</Label>
-                        <Input id="phone" value={currentInfo.phone} onChange={(e) => handleInfoChange('phone', e.target.value)} className="col-span-3" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="email" className="text-right">Email</Label>
-                        <Input id="email" value={currentInfo.email} onChange={(e) => handleInfoChange('email', e.target.value)} className="col-span-3" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="whatsappNumber" className="text-right">WhatsApp No.</Label>
-                        <Input id="whatsappNumber" value={currentInfo.whatsappNumber} onChange={(e) => handleInfoChange('whatsappNumber', e.target.value)} className="col-span-3" />
-                    </div>
-                </div>
+                </ScrollArea>
                 <DialogFooter>
                     <Button type="button" onClick={handleSubmit}>Save Changes</Button>
                 </DialogFooter>
