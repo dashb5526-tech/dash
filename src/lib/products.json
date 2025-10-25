@@ -1,3 +1,4 @@
+
 [
   {
     "name": "Premium Basmati Rice",
@@ -24,7 +25,7 @@
     ],
     "varieties": [
       "1121 Basmati",
-      "Piza",
+      "Pusa Basmati",
       "Traditional Basmati"
     ],
     "certifications": [
@@ -46,7 +47,7 @@
     "name": "Parboiled Rice",
     "description": "Partially boiled in the husk, which helps lock in nutrients. Firm texture and separate grains after cooking.",
     "imageId": "parboiled-grain",
-    "imageUrl": null,
+    "imageUrl": "/uploads/1761404944917_Screenshot_2025-10-25-07-13-24-80_40deb401b9ffe8e1df2f1cc5ba480b12.jpg",
     "specifications": [],
     "varieties": [],
     "certifications": []
