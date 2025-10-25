@@ -39,13 +39,23 @@ import { getPartners, savePartners, Partner } from "@/lib/partners";
 import { getAboutContent, saveAboutContent, AboutContent } from "@/lib/about";
 import { getContactInfo, saveContactInfo, ContactInfo } from "@/lib/contact-info";
 import { getHomeContent, saveHomeContent, HomeContent } from "@/lib/home";
+import { getSocialLinks, saveSocialLinks, SocialLink } from "@/lib/social-links";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, Edit, Trash2, Star } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Star, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+
+const iconMap: { [key: string]: React.ReactNode } = {
+    Facebook: <Facebook className="h-5 w-5" />,
+    Twitter: <Twitter className="h-5 w-5" />,
+    Instagram: <Instagram className="h-5 w-5" />,
+    Linkedin: <Linkedin className="h-5 w-5" />,
+};
 
 
 export default function AdminPage() {
@@ -56,6 +66,7 @@ export default function AdminPage() {
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
   const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
@@ -64,12 +75,14 @@ export default function AdminPage() {
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [isContactInfoDialogOpen, setIsContactInfoDialogOpen] = useState(false);
   const [isHomeDialogOpen, setIsHomeDialogOpen] = useState(false);
+  const [isSocialLinkDialogOpen, setIsSocialLinkDialogOpen] = useState(false);
 
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingGalleryImage, setEditingGalleryImage] = useState<GalleryImage | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
+  const [editingSocialLink, setEditingSocialLink] = useState<SocialLink | null>(null);
 
 
   const { toast } = useToast();
@@ -82,6 +95,7 @@ export default function AdminPage() {
     getAboutContent().then(setAboutContent);
     getContactInfo().then(setContactInfo);
     getHomeContent().then(setHomeContent);
+    getSocialLinks().then(setSocialLinks);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -497,6 +511,67 @@ export default function AdminPage() {
             });
         }
     };
+    
+    const openSocialLinkDialogForNew = () => {
+        setEditingSocialLink(null);
+        setIsSocialLinkDialogOpen(true);
+    };
+
+    const openSocialLinkDialogForEdit = (link: SocialLink) => {
+        setEditingSocialLink(link);
+        setIsSocialLinkDialogOpen(true);
+    };
+    
+    const handleSocialLinkSave = async (linkData: SocialLink) => {
+        try {
+            let updatedLinks;
+            if (editingSocialLink) {
+                updatedLinks = socialLinks.map(l => l.id === editingSocialLink.id ? linkData : l);
+            } else {
+                if (socialLinks.find(l => l.name === linkData.name)) {
+                    toast({
+                        title: "Save Failed",
+                        description: "A social link with this name already exists.",
+                        variant: "destructive",
+                    });
+                    return;
+                }
+                updatedLinks = [...socialLinks, { ...linkData, id: `social-${Date.now()}` }];
+            }
+            setSocialLinks(updatedLinks);
+            await saveSocialLinks(updatedLinks);
+            toast({
+                title: "Changes Saved",
+                description: "Social link has been saved successfully.",
+            });
+            setIsSocialLinkDialogOpen(false);
+        } catch (error: any) {
+            console.error(error);
+            toast({
+                title: "Save Failed",
+                description: error.message || "Failed to save social link.",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const handleSocialLinkDelete = async (id: string) => {
+        try {
+            const updatedLinks = socialLinks.filter(l => l.id !== id);
+            setSocialLinks(updatedLinks);
+            await saveSocialLinks(updatedLinks);
+            toast({
+                title: "Social Link Deleted",
+                description: "Social link has been deleted successfully.",
+            });
+        } catch (error) {
+            toast({
+                title: "Delete Failed",
+                description: "Failed to delete social link.",
+                variant: "destructive",
+            });
+        }
+    };
 
 
   return (
@@ -514,6 +589,7 @@ export default function AdminPage() {
                 <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
                 <TabsTrigger value="partners">Partners</TabsTrigger>
                 <TabsTrigger value="contact">Contact</TabsTrigger>
+                <TabsTrigger value="social">Social Media</TabsTrigger>
               </TabsList>
               <ScrollBar orientation="horizontal" className="h-2" />
             </ScrollArea>
@@ -831,6 +907,55 @@ export default function AdminPage() {
                     </CardContent>
                 </Card>
             </TabsContent>
+            <TabsContent value="social" className="pt-6">
+                <Card>
+                  <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="font-headline text-2xl">
+                        Social Media Management
+                      </CardTitle>
+                      <CardDescription>
+                        Add, edit, or remove your social media links.
+                      </CardDescription>
+                    </div>
+                    <Button onClick={openSocialLinkDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Social Link
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Platform</TableHead>
+                          <TableHead className="hidden sm:table-cell">URL</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {socialLinks.map((link) => (
+                          <TableRow key={link.id}>
+                            <TableCell className="font-medium flex items-center gap-3">
+                               {iconMap[link.icon]} {link.name}
+                            </TableCell>
+                            <TableCell className="hidden text-muted-foreground sm:table-cell">{link.url}</TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="icon" onClick={() => openSocialLinkDialogForEdit(link)}>
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleSocialLinkDelete(link.id)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                                 <span className="sr-only">Delete</span>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+            </TabsContent>
           </Tabs>
         </section>
       </main>
@@ -882,7 +1007,13 @@ export default function AdminPage() {
             content={homeContent}
             onSave={handleHomeSave}
         />
-        )}
+      )}
+      <SocialLinkEditDialog
+        isOpen={isSocialLinkDialogOpen}
+        setIsOpen={setIsSocialLinkDialogOpen}
+        socialLink={editingSocialLink}
+        onSave={handleSocialLinkSave}
+      />
     </div>
   );
 }
@@ -1636,3 +1767,93 @@ function HomeEditDialog({ isOpen, setIsOpen, content, onSave }: HomeEditDialogPr
         </Dialog>
     );
 }
+
+interface SocialLinkEditDialogProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    socialLink: SocialLink | null;
+    onSave: (linkData: SocialLink) => void;
+}
+
+function SocialLinkEditDialog({ isOpen, setIsOpen, socialLink, onSave }: SocialLinkEditDialogProps) {
+    const [name, setName] = useState("");
+    const [url, setUrl] = useState("");
+    const [icon, setIcon] = useState("Facebook");
+    const [id, setId] = useState("");
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (isOpen) {
+            if (socialLink) {
+                setName(socialLink.name);
+                setUrl(socialLink.url);
+                setIcon(socialLink.icon);
+                setId(socialLink.id);
+            } else {
+                setName("");
+                setUrl("");
+                setIcon("Facebook");
+                setId(`social-${Date.now()}`);
+            }
+        }
+    }, [socialLink, isOpen]);
+    
+    const handleSubmit = async () => {
+        if (!name || !url || !icon) {
+            toast({
+                title: "Missing Fields",
+                description: "Please fill out all fields before saving.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const linkData: SocialLink = { id, name, url, icon };
+        onSave(linkData);
+    }
+    
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{socialLink ? 'Edit Social Link' : 'Add New Social Link'}</DialogTitle>
+                    <DialogDescription>
+                        {socialLink ? 'Update the details for this social link.' : 'Fill in the details for the new social link.'}
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="social-name" className="text-right">Name</Label>
+                        <Input id="social-name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="social-icon" className="text-right">Icon</Label>
+                         <Select onValueChange={setIcon} defaultValue={icon}>
+                            <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Select an icon" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.keys(iconMap).map(iconKey => (
+                                    <SelectItem key={iconKey} value={iconKey}>
+                                        <div className="flex items-center gap-2">
+                                            {iconMap[iconKey]}
+                                            {iconKey}
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="social-url" className="text-right">URL</Label>
+                        <Input id="social-url" value={url} onChange={(e) => setUrl(e.target.value)} className="col-span-3" />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
