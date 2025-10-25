@@ -808,7 +808,7 @@ export default function AdminPage() {
                       </CardDescription>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                        <Button onClick={() => setIsProductsSectionDialogOpen(true)} className="w-full sm:w-auto" variant="outline">
+                        <Button onClick={() => setIsProductsSectionDialogOpen(true)} className="w-full sm:w-auto" variant="outline" disabled={!productsSection}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Section Text
                         </Button>
@@ -2452,3 +2452,4 @@ function TermsEditDialog({ isOpen, setIsOpen, content, onSave }: TermsEditDialog
     );
 }
 
+    

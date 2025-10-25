@@ -126,3 +126,5 @@ export function Products({ isHomePage = false }: { isHomePage?: boolean }) {
     </section>
   );
 }
+
+    
