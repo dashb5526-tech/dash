@@ -42,7 +42,7 @@ import { getHomeContent, saveHomeContent, HomeContent } from "@/lib/home";
 import { getSocialLinks, saveSocialLinks, SocialLink } from "@/lib/social-links";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, X } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -1034,6 +1034,9 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [imageId, setImageId] = useState("");
+    const [specifications, setSpecifications] = useState<{ key: string; value: string }[]>([]);
+    const [varieties, setVarieties] useState<string[]>([]);
+    const [certifications, setCertifications] = useState<string[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const { toast } = useToast();
@@ -1044,11 +1047,17 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
                 setName(product.name);
                 setDescription(product.description);
                 setImageId(product.imageId);
+                setSpecifications(product.specifications || []);
+                setVarieties(product.varieties || []);
+                setCertifications(product.certifications || []);
                 setPreviewUrl(product.imageUrl);
             } else {
                 setName("");
                 setDescription("");
                 setImageId("");
+                setSpecifications([{ key: "", value: "" }]);
+                setVarieties([]);
+                setCertifications([]);
                 setPreviewUrl(null);
             }
             setSelectedFile(null);
@@ -1072,11 +1081,27 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
         }
     };
 
+    const handleSpecificationChange = (index: number, field: 'key' | 'value', value: string) => {
+        const newSpecs = [...specifications];
+        newSpecs[index][field] = value;
+        setSpecifications(newSpecs);
+    };
+
+    const addSpecification = () => setSpecifications([...specifications, { key: "", value: "" }]);
+    const removeSpecification = (index: number) => {
+        const newSpecs = specifications.filter((_, i) => i !== index);
+        setSpecifications(newSpecs);
+    };
+    
+    const handleTagChange = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
+        setter(value.split(',').map(tag => tag.trim()).filter(tag => tag));
+    };
+
     const handleSubmit = async () => {
         if (!name || !description || !imageId) {
             toast({
                 title: "Missing Fields",
-                description: "Please fill out all fields before saving.",
+                description: "Please fill out Name, Description, and Image ID before saving.",
                 variant: "destructive",
             });
             return;
@@ -1086,7 +1111,10 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
             name,
             description,
             imageId,
-            imageUrl: product?.imageUrl || previewUrl
+            imageUrl: product?.imageUrl || previewUrl,
+            specifications: specifications.filter(s => s.key && s.value),
+            varieties,
+            certifications
         };
         
         onSave(productData, selectedFile);
@@ -1094,15 +1122,15 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
     
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
                     <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
                     <DialogDescription>
                         {product ? 'Update the details for this product.' : 'Fill in the details for the new product.'}
                     </DialogDescription>
                 </DialogHeader>
-                <ScrollArea className="h-[60vh] pr-6">
-                    <div className="grid gap-4 py-4">
+                <ScrollArea className="h-[70vh] pr-6">
+                    <div className="grid gap-6 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right">Name</Label>
                             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" disabled={!!product} />
@@ -1126,6 +1154,30 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
                                     </div>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <Label>Specifications</Label>
+                            {specifications.map((spec, index) => (
+                                <div key={index} className="flex gap-2 items-center">
+                                    <Input placeholder="Key" value={spec.key} onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)} />
+                                    <Input placeholder="Value" value={spec.value} onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)} />
+                                    <Button variant="ghost" size="icon" onClick={() => removeSpecification(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                                </div>
+                            ))}
+                            <Button variant="outline" size="sm" onClick={addSpecification}><PlusCircle className="mr-2 h-4 w-4" /> Add Spec</Button>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="varieties">Available Varieties</Label>
+                            <Input id="varieties" value={varieties.join(', ')} onChange={(e) => handleTagChange(setVarieties, e.target.value)} placeholder="e.g., 1121 Basmati, Pusa Basmati" />
+                            <p className="text-xs text-muted-foreground">Enter tags separated by commas.</p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="certifications">Certifications</Label>
+                            <Input id="certifications" value={certifications.join(', ')} onChange={(e) => handleTagChange(setCertifications, e.target.value)} placeholder="e.g., Organic, Export Grade" />
+                            <p className="text-xs text-muted-foreground">Enter tags separated by commas.</p>
                         </div>
                     </div>
                 </ScrollArea>
@@ -1865,6 +1917,7 @@ function SocialLinkEditDialog({ isOpen, setIsOpen, socialLink, onSave }: SocialL
         </Dialog>
     );
 }
+
 
 
 

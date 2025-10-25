@@ -1,44 +1,91 @@
+
 [
   {
     "name": "Premium Basmati Rice",
     "description": "Long, slender grains with a distinct aroma and fluffy texture. Perfect for biryani and pulao.",
     "imageId": "basmati-grain",
-    "imageUrl": "/uploads/1760776584027_IMG-20251015-WA0003.jpg"
+    "imageUrl": "/uploads/1760776584027_IMG-20251015-WA0003.jpg",
+    "specifications": [
+      {
+        "key": "Grain Length",
+        "value": "8.0-8.5mm"
+      },
+      {
+        "key": "Purity",
+        "value": "95% minimum"
+      },
+      {
+        "key": "Moisture",
+        "value": "12-13%"
+      },
+      {
+        "key": "Broken Grains",
+        "value": "<1%"
+      }
+    ],
+    "varieties": [
+      "1121 Basmati",
+      "Pusa Basmati",
+      "Traditional Basmati"
+    ],
+    "certifications": [
+      "Organic",
+      "Export Grade",
+      "GI Tagged"
+    ]
   },
   {
     "name": "Sona Masoori Rice",
     "description": "Lightweight and aromatic medium-grain rice. Ideal for everyday meals and South Indian dishes.",
     "imageId": "sona-masoori-grain",
-    "imageUrl": null
+    "imageUrl": null,
+    "specifications": [],
+    "varieties": [],
+    "certifications": []
   },
   {
     "name": "Parboiled Rice",
     "description": "Partially boiled in the husk, which helps lock in nutrients. Firm texture and separate grains after cooking.",
     "imageId": "parboiled-grain",
-    "imageUrl": null
+    "imageUrl": null,
+    "specifications": [],
+    "varieties": [],
+    "certifications": []
   },
   {
     "name": "Brown Rice",
     "description": "Whole-grain rice with the outer bran layer intact, offering a nutty flavor and higher fiber content.",
     "imageId": "brown-rice-grain",
-    "imageUrl": null
+    "imageUrl": null,
+    "specifications": [],
+    "varieties": [],
+    "certifications": []
   },
   {
     "name": "Broken Rice (Wholesale)",
     "description": "Fragments of rice grains, broken during processing. An economical choice for various dishes and industries.",
     "imageId": "broken-rice-grain",
-    "imageUrl": null
+    "imageUrl": null,
+    "specifications": [],
+    "varieties": [],
+    "certifications": []
   },
   {
     "name": "hdh",
     "description": "aioaif",
     "imageId": "aaih",
-    "imageUrl": "/uploads/1760776797510_IMG-20251015-WA0001.jpg"
+    "imageUrl": "/uploads/1760776797510_IMG-20251015-WA0001.jpg",
+    "specifications": [],
+    "varieties": [],
+    "certifications": []
   },
   {
     "name": "kgfkf",
     "description": "kjfufug",
     "imageId": "kkkk",
-    "imageUrl": "/uploads/1760776985101_IMG-20250929-WA0004.jpg"
+    "imageUrl": "/uploads/1760776985101_IMG-20250929-WA0004.jpg",
+    "specifications": [],
+    "varieties": [],
+    "certifications": []
   }
 ]

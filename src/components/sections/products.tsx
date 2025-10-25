@@ -10,9 +10,10 @@ import { getProducts, Product } from "@/lib/products";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2 } from "lucide-react";
 
 function ProductCard({ product }: { product: Product }) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const imageSrc = product.imageUrl || PlaceHolderImages.find(p => p.id === product.imageId)?.imageUrl;
   const imageHint = product.imageUrl ? undefined : PlaceHolderImages.find(p => p.id === product.imageId)?.imageHint;
 
@@ -32,18 +33,52 @@ function ProductCard({ product }: { product: Product }) {
       <CardHeader className="p-2 sm:p-4">
         <CardTitle className="font-headline text-base sm:text-xl line-clamp-2">{product.name}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-1 flex-col p-2 pt-0 sm:p-4 sm:pt-0">
-        <CardDescription className={cn("flex-1 text-xs sm:text-sm", !isExpanded && "line-clamp-3 sm:line-clamp-4")}>
+      <CardContent className="flex flex-1 flex-col p-2 pt-0 sm:p-4 sm:pt-0 space-y-4">
+        <CardDescription className="text-xs sm:text-sm">
           {product.description}
         </CardDescription>
-        {product.description.length > 50 && ( // Heuristic to decide if Read More is needed
-            <Button variant="link" size="sm" className="h-auto p-0 mt-1 text-accent justify-start text-xs" onClick={() => setIsExpanded(!isExpanded)}>
-                {isExpanded ? "Read less" : "Read more"}
-            </Button>
+
+        {product.specifications && product.specifications.length > 0 && (
+          <div>
+            <h4 className="font-semibold text-sm mb-2">Specifications:</h4>
+            <ul className="space-y-1 text-xs text-muted-foreground list-disc list-inside">
+              {product.specifications.map((spec, i) => (
+                <li key={i}>
+                  <span className="font-medium text-foreground/80">{spec.key}:</span> {spec.value}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
-        <div className="mt-4">
+
+        {product.varieties && product.varieties.length > 0 && (
+          <div>
+            <h4 className="font-semibold text-sm mb-2">Available Varieties:</h4>
+            <div className="flex flex-wrap gap-2">
+              {product.varieties.map((variety) => (
+                <Badge key={variety} variant="secondary" className="text-xs">{variety}</Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {product.certifications && product.certifications.length > 0 && (
+          <div>
+            <h4 className="font-semibold text-sm mb-2">Certifications:</h4>
+            <div className="flex flex-wrap gap-2">
+              {product.certifications.map((cert) => (
+                <Badge key={cert} className="bg-green-100 text-green-800 border-green-200 text-xs hover:bg-green-200">
+                  <CheckCircle2 className="h-3 w-3 mr-1"/>
+                  {cert}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="!mt-auto pt-4">
           <Button asChild variant="outline" size="sm" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
-              <Link href="/contact">Ask for Pricing</Link>
+              <Link href="/contact">Request Quote</Link>
           </Button>
         </div>
       </CardContent>
@@ -69,7 +104,7 @@ export function Products() {
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.name} product={product} />
           ))}

@@ -3,6 +3,9 @@ export interface Product {
   description: string;
   imageId: string;
   imageUrl: string | null;
+  specifications: { key: string; value: string }[];
+  varieties: string[];
+  certifications: string[];
 }
 
 export async function getProducts(): Promise<Product[]> {
