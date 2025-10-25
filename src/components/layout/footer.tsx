@@ -19,6 +19,10 @@ const sections = [
   { name: "Contact", href: "/contact" },
 ];
 
+const legalSections = [
+    { name: "Terms & Conditions", href: "/terms-and-conditions" },
+];
+
 const socialIconMap: { [key: string]: React.ReactNode } = {
   Facebook: <Facebook className="h-5 w-5" />,
   X: <XIcon className="h-5 w-5" />,
@@ -69,6 +73,20 @@ export function Footer() {
               <p className="font-semibold text-foreground">Company</p>
               <nav className="mt-4 flex flex-col space-y-2">
                 {sections.map((section) => (
+                  <Link
+                    key={section.name}
+                    href={section.href}
+                    className="text-sm text-muted-foreground hover:text-primary hover:underline"
+                  >
+                    {section.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Legal</p>
+              <nav className="mt-4 flex flex-col space-y-2">
+                {legalSections.map((section) => (
                   <Link
                     key={section.name}
                     href={section.href}

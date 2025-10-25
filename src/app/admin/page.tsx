@@ -43,6 +43,7 @@ import { getSocialLinks, saveSocialLinks, SocialLink } from "@/lib/social-links"
 import { getProductsSection, saveProductsSection, ProductsSection } from "@/lib/products-section";
 import { getTestimonialsSection, saveTestimonialsSection, TestimonialsSection } from "@/lib/testimonials-section";
 import { getContactSection, saveContactSection, ContactSection } from "@/lib/contact-section";
+import { getTermsContent, saveTermsContent, TermsContent } from "@/lib/terms";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin } from "lucide-react";
@@ -74,6 +75,7 @@ export default function AdminPage() {
   const [productsSection, setProductsSection] = useState<ProductsSection | null>(null);
   const [testimonialsSection, setTestimonialsSection] = useState<TestimonialsSection | null>(null);
   const [contactSection, setContactSection] = useState<ContactSection | null>(null);
+  const [termsContent, setTermsContent] = useState<TermsContent | null>(null);
 
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
@@ -88,6 +90,7 @@ export default function AdminPage() {
   const [isSocialLinkDialogOpen, setIsSocialLinkDialogOpen] = useState(false);
   const [isProductsSectionDialogOpen, setIsProductsSectionDialogOpen] = useState(false);
   const [isContactSectionDialogOpen, setIsContactSectionDialogOpen] = useState(false);
+  const [isTermsDialogOpen, setIsTermsDialogOpen] = useState(false);
 
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -111,6 +114,7 @@ export default function AdminPage() {
     getProductsSection().then(setProductsSection);
     getTestimonialsSection().then(setTestimonialsSection);
     getContactSection().then(setContactSection);
+    getTermsContent().then(setTermsContent);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -685,6 +689,24 @@ export default function AdminPage() {
       }
     };
 
+    const handleTermsSave = async (newTermsContent: TermsContent) => {
+        try {
+            setTermsContent(newTermsContent);
+            await saveTermsContent(newTermsContent);
+            toast({
+                title: "Changes Saved",
+                description: "Terms and Conditions have been saved successfully.",
+            });
+            setIsTermsDialogOpen(false);
+        } catch (error: any) {
+            toast({
+                title: "Save Failed",
+                description: error.message || "Failed to save Terms and Conditions.",
+                variant: "destructive",
+            });
+        }
+    };
+
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -702,6 +724,7 @@ export default function AdminPage() {
                 <TabsTrigger value="partners">Partners</TabsTrigger>
                 <TabsTrigger value="contact">Contact</TabsTrigger>
                 <TabsTrigger value="social">Social Media</TabsTrigger>
+                <TabsTrigger value="legal">Legal</TabsTrigger>
               </TabsList>
               <ScrollBar orientation="horizontal" className="h-2" />
             </ScrollArea>
@@ -1096,6 +1119,36 @@ export default function AdminPage() {
                   </CardContent>
                 </Card>
             </TabsContent>
+            <TabsContent value="legal" className="pt-6">
+                <Card>
+                    <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1">
+                            <CardTitle className="font-headline text-2xl">
+                                Legal Content
+                            </CardTitle>
+                            <CardDescription>
+                                Edit the content of your legal pages like Terms and Conditions.
+                            </CardDescription>
+                        </div>
+                        <Button onClick={() => setIsTermsDialogOpen(true)} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!termsContent}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Terms & Conditions
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        {termsContent ? (
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="font-semibold">Terms & Conditions</h4>
+                                    <p className="text-sm text-muted-foreground truncate">{termsContent.content}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>Loading legal content...</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </TabsContent>
           </Tabs>
         </section>
       </main>
@@ -1184,6 +1237,14 @@ export default function AdminPage() {
           setIsOpen={setIsContactSectionDialogOpen}
           content={contactSection}
           onSave={handleContactSectionSave}
+        />
+      )}
+      {termsContent && (
+        <TermsEditDialog
+            isOpen={isTermsDialogOpen}
+            setIsOpen={setIsTermsDialogOpen}
+            content={termsContent}
+            onSave={handleTermsSave}
         />
       )}
     </div>
@@ -2337,3 +2398,57 @@ function ContactSectionEditDialog({ isOpen, setIsOpen, content, onSave }: Contac
     </Dialog>
   );
 }
+
+interface TermsEditDialogProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    content: TermsContent;
+    onSave: (content: TermsContent) => void;
+}
+
+function TermsEditDialog({ isOpen, setIsOpen, content, onSave }: TermsEditDialogProps) {
+    const [currentContent, setCurrentContent] = useState<TermsContent>(content);
+
+    useEffect(() => {
+        if(isOpen) {
+            setCurrentContent(content);
+        }
+    }, [isOpen, content]);
+
+    const handleContentChange = (field: keyof TermsContent, value: string) => {
+        setCurrentContent(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleSubmit = () => {
+        onSave(currentContent);
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>Edit Terms & Conditions</DialogTitle>
+                    <DialogDescription>
+                        Make changes to your Terms and Conditions page.
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-[70vh] pr-6">
+                    <div className="space-y-6 py-4">
+                        <div className="grid gap-4">
+                            <Label>Title</Label>
+                            <Input value={currentContent.title} onChange={e => handleContentChange('title', e.target.value)} />
+                        </div>
+                        <div className="grid gap-4">
+                            <Label>Content</Label>
+                            <Textarea value={currentContent.content} onChange={e => handleContentChange('content', e.target.value)} rows={15}/>
+                        </div>
+                    </div>
+                </ScrollArea>
+                <DialogFooter>
+                    <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
