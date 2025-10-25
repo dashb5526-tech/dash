@@ -48,11 +48,11 @@ export function WhatsAppFAB() {
         return () => window.removeEventListener('scroll', toggleVisibility);
     }, []);
 
-    if (!contactInfo || !contactInfo.phone) {
+    if (!contactInfo || !contactInfo.whatsappNumber) {
         return null;
     }
 
-    const phoneNumber = contactInfo.phone.replace(/\D/g, '');
+    const phoneNumber = contactInfo.whatsappNumber.replace(/\D/g, '');
     const whatsappUrl = `https://wa.me/${phoneNumber}`;
 
     return (

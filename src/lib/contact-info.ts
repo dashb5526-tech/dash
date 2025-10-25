@@ -2,6 +2,7 @@ export interface ContactInfo {
   address: string;
   phone: string;
   email: string;
+  whatsappNumber: string;
 }
 
 export async function getContactInfo(): Promise<ContactInfo | null> {

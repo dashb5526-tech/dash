@@ -10,7 +10,7 @@ async function getContactInfoData() {
         return JSON.parse(data);
     } catch (error) {
         console.error("Error reading contact info file, returning empty structure.", error);
-        return { address: "", phone: "", email: "" };
+        return { address: "", phone: "", email: "", whatsappNumber: "" };
     }
 }
 

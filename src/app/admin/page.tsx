@@ -900,6 +900,10 @@ export default function AdminPage() {
                                     <h4 className="font-semibold">Email</h4>
                                     <p className="text-sm text-muted-foreground">{contactInfo.email}</p>
                                 </div>
+                                <div>
+                                    <h4 className="font-semibold">WhatsApp Number</h4>
+                                    <p className="text-sm text-muted-foreground">{contactInfo.whatsappNumber}</p>
+                                </div>
                             </div>
                         ) : (
                             <p>Loading contact information...</p>
@@ -1619,7 +1623,7 @@ function ContactInfoEditDialog({ isOpen, setIsOpen, info, onSave }: ContactInfoE
         }
     }, [isOpen, info]);
 
-    const handleInfoChange = (field: 'address' | 'phone' | 'email', value: string) => {
+    const handleInfoChange = (field: 'address' | 'phone' | 'email' | 'whatsappNumber', value: string) => {
         setCurrentInfo(prev => ({
             ...prev,
             [field]: value
@@ -1651,6 +1655,10 @@ function ContactInfoEditDialog({ isOpen, setIsOpen, info, onSave }: ContactInfoE
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="email" className="text-right">Email</Label>
                         <Input id="email" value={currentInfo.email} onChange={(e) => handleInfoChange('email', e.target.value)} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="whatsappNumber" className="text-right">WhatsApp No.</Label>
+                        <Input id="whatsappNumber" value={currentInfo.whatsappNumber} onChange={(e) => handleInfoChange('whatsappNumber', e.target.value)} className="col-span-3" />
                     </div>
                 </div>
                 <DialogFooter>
@@ -1856,4 +1864,5 @@ function SocialLinkEditDialog({ isOpen, setIsOpen, socialLink, onSave }: SocialL
         </Dialog>
     );
 }
+
 
