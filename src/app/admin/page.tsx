@@ -40,6 +40,7 @@ import { getAboutContent, saveAboutContent, AboutContent } from "@/lib/about";
 import { getContactInfo, saveContactInfo, ContactInfo } from "@/lib/contact-info";
 import { getHomeContent, saveHomeContent, HomeContent } from "@/lib/home";
 import { getSocialLinks, saveSocialLinks, SocialLink } from "@/lib/social-links";
+import { getProductsSection, saveProductsSection, ProductsSection } from "@/lib/products-section";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin } from "lucide-react";
@@ -68,6 +69,7 @@ export default function AdminPage() {
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
   const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [productsSection, setProductsSection] = useState<ProductsSection | null>(null);
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
@@ -77,6 +79,7 @@ export default function AdminPage() {
   const [isContactInfoDialogOpen, setIsContactInfoDialogOpen] = useState(false);
   const [isHomeDialogOpen, setIsHomeDialogOpen] = useState(false);
   const [isSocialLinkDialogOpen, setIsSocialLinkDialogOpen] = useState(false);
+  const [isProductsSectionDialogOpen, setIsProductsSectionDialogOpen] = useState(false);
 
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -97,6 +100,7 @@ export default function AdminPage() {
     getContactInfo().then(setContactInfo);
     getHomeContent().then(setHomeContent);
     getSocialLinks().then(setSocialLinks);
+    getProductsSection().then(setProductsSection);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -574,6 +578,24 @@ export default function AdminPage() {
         }
     };
 
+    const handleProductsSectionSave = async (newProductsSection: ProductsSection) => {
+      try {
+        setProductsSection(newProductsSection);
+        await saveProductsSection(newProductsSection);
+        toast({
+          title: "Changes Saved",
+          description: "Products section has been saved successfully.",
+        });
+        setIsProductsSectionDialogOpen(false);
+      } catch (error: any) {
+        toast({
+          title: "Save Failed",
+          description: error.message || "Failed to save products section.",
+          variant: "destructive",
+        });
+      }
+    };
+
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -673,10 +695,16 @@ export default function AdminPage() {
                         Add, edit, or remove products from your store.
                       </CardDescription>
                     </div>
-                    <Button onClick={openProductDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Product
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <Button onClick={() => setIsProductsSectionDialogOpen(true)} className="w-full sm:w-auto" variant="outline">
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Section Text
+                        </Button>
+                        <Button onClick={openProductDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          Add Product
+                        </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <Table>
@@ -1019,6 +1047,14 @@ export default function AdminPage() {
         socialLink={editingSocialLink}
         onSave={handleSocialLinkSave}
       />
+       {productsSection && (
+        <ProductsSectionEditDialog
+          isOpen={isProductsSectionDialogOpen}
+          setIsOpen={setIsProductsSectionDialogOpen}
+          content={productsSection}
+          onSave={handleProductsSectionSave}
+        />
+      )}
     </div>
   );
 }
@@ -1921,8 +1957,56 @@ function SocialLinkEditDialog({ isOpen, setIsOpen, socialLink, onSave }: SocialL
     );
 }
 
+interface ProductsSectionEditDialogProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  content: ProductsSection;
+  onSave: (content: ProductsSection) => void;
+}
 
+function ProductsSectionEditDialog({ isOpen, setIsOpen, content, onSave }: ProductsSectionEditDialogProps) {
+  const [currentContent, setCurrentContent] = useState<ProductsSection>(content);
 
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentContent(content);
+    }
+  }, [isOpen, content]);
 
+  const handleContentChange = (field: 'title' | 'description', value: string) => {
+    setCurrentContent(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
+  const handleSubmit = () => {
+    onSave(currentContent);
+  };
 
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Products Section</DialogTitle>
+          <DialogDescription>
+            Update the title and description for the products section.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="products-title" className="text-right">Title</Label>
+            <Input id="products-title" value={currentContent.title} onChange={(e) => handleContentChange('title', e.target.value)} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="products-description" className="text-right">Description</Label>
+            <Textarea id="products-description" value={currentContent.description} onChange={(e) => handleContentChange('description', e.target.value)} className="col-span-3" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

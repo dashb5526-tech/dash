@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getProducts, Product } from "@/lib/products";
+import { getProductsSection, ProductsSection } from "@/lib/products-section";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,7 @@ function ProductCard({ product }: { product: Product }) {
         <CardTitle className="font-headline text-base sm:text-xl line-clamp-2">{product.name}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col p-2 pt-0 sm:p-4 sm:pt-0 space-y-4">
-        <CardDescription className="text-xs sm:text-sm">
+        <CardDescription className="text-xs sm:text-sm line-clamp-3">
           {product.description}
         </CardDescription>
 
@@ -88,9 +89,11 @@ function ProductCard({ product }: { product: Product }) {
 
 export function Products({ isHomePage = false }: { isHomePage?: boolean }) {
   const [products, setProducts] = useState<Product[]>([]);
+  const [sectionContent, setSectionContent] = useState<ProductsSection | null>(null);
 
   useEffect(() => {
     getProducts().then(setProducts);
+    getProductsSection().then(setSectionContent);
   }, []);
 
   const displayedProducts = isHomePage ? products.slice(0, 4) : products;
@@ -100,10 +103,10 @@ export function Products({ isHomePage = false }: { isHomePage?: boolean }) {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Our Premium Rice Selection
+            {sectionContent?.title || "Our Premium Rice Selection"}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            We offer a diverse range of high-quality rice to meet the needs of every customer, from households to large-scale businesses.
+            {sectionContent?.description || "We offer a diverse range of high-quality rice to meet the needs of every customer, from households to large-scale businesses."}
           </p>
         </div>
 
