@@ -96,12 +96,12 @@ export function Testimonials() {
             Our Proud Partners
           </h3>
           <div className="mt-8 flow-root">
-            <div className="-mt-4 -ml-8 flex flex-wrap justify-center lg:-ml-4">
+            <div className="flex flex-wrap items-center justify-center gap-8">
               {partners.map((partner) => (
-                <div key={partner.id} className="mt-4 ml-8 flex flex-shrink-0 flex-grow justify-center lg:ml-4 lg:flex-grow-0">
+                <div key={partner.id} className="flex flex-shrink-0 justify-center">
                   {partner.logoUrl && (
                     <Image
-                      className="h-12 object-contain"
+                      className="h-12 w-auto object-contain"
                       src={partner.logoUrl}
                       alt={partner.name}
                       width={158}
