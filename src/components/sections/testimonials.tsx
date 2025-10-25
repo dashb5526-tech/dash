@@ -14,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useRef, useState } from 'react';
 import { getTestimonials, Testimonial } from '@/lib/testimonials';
 import { getPartners, Partner } from '@/lib/partners';
+import { getTestimonialsSection, TestimonialsSection } from '@/lib/testimonials-section';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from "embla-carousel-autoplay";
@@ -22,6 +23,7 @@ import Autoplay from "embla-carousel-autoplay";
 export function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [sectionContent, setSectionContent] = useState<TestimonialsSection | null>(null);
   const plugin = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
   );
@@ -29,6 +31,7 @@ export function Testimonials() {
   useEffect(() => {
     getTestimonials().then(setTestimonials);
     getPartners().then(setPartners);
+    getTestimonialsSection().then(setSectionContent);
   }, []);
 
   return (
@@ -36,10 +39,10 @@ export function Testimonials() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Trusted by the Best
+            {sectionContent?.title || "Trusted by the Best"}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Hear what our valued clients have to say about our products and services.
+            {sectionContent?.description || "Hear what our valued clients have to say about our products and services."}
           </p>
         </div>
 

@@ -41,6 +41,7 @@ import { getContactInfo, saveContactInfo, ContactInfo } from "@/lib/contact-info
 import { getHomeContent, saveHomeContent, HomeContent } from "@/lib/home";
 import { getSocialLinks, saveSocialLinks, SocialLink } from "@/lib/social-links";
 import { getProductsSection, saveProductsSection, ProductsSection } from "@/lib/products-section";
+import { getTestimonialsSection, saveTestimonialsSection, TestimonialsSection } from "@/lib/testimonials-section";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin } from "lucide-react";
@@ -70,11 +71,14 @@ export default function AdminPage() {
   const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [productsSection, setProductsSection] = useState<ProductsSection | null>(null);
+  const [testimonialsSection, setTestimonialsSection] = useState<TestimonialsSection | null>(null);
+
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isGalleryImageDialogOpen, setIsGalleryImageDialogOpen] = useState(false);
   const [isGallerySectionDialogOpen, setIsGallerySectionDialogOpen] = useState(false);
   const [isTestimonialDialogOpen, setIsTestimonialDialogOpen] = useState(false);
+  const [isTestimonialsSectionDialogOpen, setIsTestimonialsSectionDialogOpen] = useState(false);
   const [isPartnerDialogOpen, setIsPartnerDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [isContactInfoDialogOpen, setIsContactInfoDialogOpen] = useState(false);
@@ -102,6 +106,7 @@ export default function AdminPage() {
     getHomeContent().then(setHomeContent);
     getSocialLinks().then(setSocialLinks);
     getProductsSection().then(setProductsSection);
+    getTestimonialsSection().then(setTestimonialsSection);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -370,6 +375,25 @@ export default function AdminPage() {
       });
     }
   };
+
+  const handleTestimonialsSectionSave = async (newTestimonialsSection: TestimonialsSection) => {
+    try {
+      setTestimonialsSection(newTestimonialsSection);
+      await saveTestimonialsSection(newTestimonialsSection);
+      toast({
+        title: "Changes Saved",
+        description: "Testimonials section has been saved successfully.",
+      });
+      setIsTestimonialsSectionDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Save Failed",
+        description: error.message || "Failed to save testimonials section.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   const openPartnerDialogForNew = () => {
     setEditingPartner(null);
@@ -822,10 +846,16 @@ export default function AdminPage() {
                         Add, edit, or remove testimonials from your home page.
                       </CardDescription>
                     </div>
-                    <Button onClick={openTestimonialDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Testimonial
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <Button onClick={() => setIsTestimonialsSectionDialogOpen(true)} className="w-full sm:w-auto" variant="outline">
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Section Text
+                        </Button>
+                        <Button onClick={openTestimonialDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          Add Testimonial
+                        </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <Table>
@@ -1052,6 +1082,14 @@ export default function AdminPage() {
         testimonial={editingTestimonial}
         onSave={handleTestimonialSave}
       />
+       {testimonialsSection && (
+        <TestimonialsSectionEditDialog
+          isOpen={isTestimonialsSectionDialogOpen}
+          setIsOpen={setIsTestimonialsSectionDialogOpen}
+          content={testimonialsSection}
+          onSave={handleTestimonialsSectionSave}
+        />
+      )}
       <PartnerEditDialog
         isOpen={isPartnerDialogOpen}
         setIsOpen={setIsPartnerDialogOpen}
@@ -2096,6 +2134,60 @@ function GallerySectionEditDialog({ isOpen, setIsOpen, content, onSave }: Galler
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="gallery-description" className="text-right">Description</Label>
             <Textarea id="gallery-description" value={currentContent.description} onChange={(e) => handleContentChange('description', e.target.value)} className="col-span-3" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface TestimonialsSectionEditDialogProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  content: TestimonialsSection;
+  onSave: (content: TestimonialsSection) => void;
+}
+
+function TestimonialsSectionEditDialog({ isOpen, setIsOpen, content, onSave }: TestimonialsSectionEditDialogProps) {
+  const [currentContent, setCurrentContent] = useState<TestimonialsSection>(content);
+
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentContent(content);
+    }
+  }, [isOpen, content]);
+
+  const handleContentChange = (field: 'title' | 'description', value: string) => {
+    setCurrentContent(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = () => {
+    onSave(currentContent);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Testimonials Section</DialogTitle>
+          <DialogDescription>
+            Update the title and description for the testimonials section.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="testimonials-title" className="text-right">Title</Label>
+            <Input id="testimonials-title" value={currentContent.title} onChange={(e) => handleContentChange('title', e.target.value)} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="testimonials-description" className="text-right">Description</Label>
+            <Textarea id="testimonials-description" value={currentContent.description} onChange={(e) => handleContentChange('description', e.target.value)} className="col-span-3" />
           </div>
         </div>
         <DialogFooter>
