@@ -1035,7 +1035,7 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
     const [description, setDescription] = useState("");
     const [imageId, setImageId] = useState("");
     const [specifications, setSpecifications] = useState<{ key: string; value: string }[]>([]);
-    const [varieties, setVarieties] useState<string[]>([]);
+    const [varieties, setVarieties] = useState<string[]>([]);
     const [certifications, setCertifications] = useState<string[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -1083,6 +1083,9 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
 
     const handleSpecificationChange = (index: number, field: 'key' | 'value', value: string) => {
         const newSpecs = [...specifications];
+        if (!newSpecs[index]) {
+            newSpecs[index] = { key: '', value: '' };
+        }
         newSpecs[index][field] = value;
         setSpecifications(newSpecs);
     };
@@ -1917,6 +1920,7 @@ function SocialLinkEditDialog({ isOpen, setIsOpen, socialLink, onSave }: SocialL
         </Dialog>
     );
 }
+
 
 
 
