@@ -1994,6 +1994,10 @@ function HomeEditDialog({ isOpen, setIsOpen, content, onSave }: HomeEditDialogPr
                             <Input value={currentContent.brand.name} onChange={e => handleContentChange('brand', 'name', e.target.value)} />
                         </div>
                         <div className="grid gap-4">
+                            <Label>Footer Description</Label>
+                            <Textarea value={currentContent.brand.footerDescription} onChange={e => handleContentChange('brand', 'footerDescription', e.target.value)} />
+                        </div>
+                        <div className="grid gap-4">
                             <Label>Brand Logo</Label>
                             <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'logo')} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
                             <p className="text-xs text-muted-foreground mt-1">Max file size: 2MB</p>

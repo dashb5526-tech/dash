@@ -1,7 +1,9 @@
+
 export interface HomeContent {
     brand: {
         name: string;
         logoUrl: string | null;
+        footerDescription: string;
     };
     hero: {
         headline: string;

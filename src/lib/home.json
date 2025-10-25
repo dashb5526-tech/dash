@@ -1,7 +1,9 @@
+
 {
   "brand": {
     "name": "bikash",
-    "logoUrl": "/uploads/1760784949786_1267252.jpg"
+    "logoUrl": "/uploads/1760784949786_1267252.jpg",
+    "footerDescription": "A trusted rice trading and distribution company providing high-quality rice varieties."
   },
   "hero": {
     "headline": "From Our Farms to Your Table",

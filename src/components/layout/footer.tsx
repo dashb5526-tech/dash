@@ -53,7 +53,7 @@ export function Footer() {
               </span>
             </Link>
              <p className="mt-4 text-sm text-muted-foreground">
-              A trusted rice trading and distribution company providing high-quality rice varieties.
+              {homeContent?.brand.footerDescription}
             </p>
             <div className="mt-6 flex space-x-4">
               {socialLinks.map((link) => (
