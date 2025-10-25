@@ -30,6 +30,7 @@ import { submitForm } from "@/lib/actions";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getProducts, Product } from "@/lib/products";
 import { getContactInfo, ContactInfo } from "@/lib/contact-info";
+import { getContactSection, ContactSection } from "@/lib/contact-section";
 import { useEffect, useState } from "react";
 
 const contactFormSchema = z.object({
@@ -53,10 +54,12 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'map');
 export function Contact() {
   const [products, setProducts] = useState<Product[]>([]);
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [sectionContent, setSectionContent] = useState<ContactSection | null>(null);
 
   useEffect(() => {
     getProducts().then(setProducts);
     getContactInfo().then(setContactInfo);
+    getContactSection().then(setSectionContent);
   }, []);
 
   const contactForm = useForm<z.infer<typeof contactFormSchema>>({
@@ -94,10 +97,10 @@ export function Contact() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Get In Touch
+            {sectionContent?.title || "Get In Touch"}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            We're here to help with your inquiries and bulk orders. Reach out to us today!
+            {sectionContent?.description || "We're here to help with your inquiries and bulk orders. Reach out to us today!"}
           </p>
         </div>
 

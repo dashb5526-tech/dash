@@ -42,6 +42,7 @@ import { getHomeContent, saveHomeContent, HomeContent } from "@/lib/home";
 import { getSocialLinks, saveSocialLinks, SocialLink } from "@/lib/social-links";
 import { getProductsSection, saveProductsSection, ProductsSection } from "@/lib/products-section";
 import { getTestimonialsSection, saveTestimonialsSection, TestimonialsSection } from "@/lib/testimonials-section";
+import { getContactSection, saveContactSection, ContactSection } from "@/lib/contact-section";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin } from "lucide-react";
@@ -72,6 +73,7 @@ export default function AdminPage() {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [productsSection, setProductsSection] = useState<ProductsSection | null>(null);
   const [testimonialsSection, setTestimonialsSection] = useState<TestimonialsSection | null>(null);
+  const [contactSection, setContactSection] = useState<ContactSection | null>(null);
 
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
@@ -85,6 +87,7 @@ export default function AdminPage() {
   const [isHomeDialogOpen, setIsHomeDialogOpen] = useState(false);
   const [isSocialLinkDialogOpen, setIsSocialLinkDialogOpen] = useState(false);
   const [isProductsSectionDialogOpen, setIsProductsSectionDialogOpen] = useState(false);
+  const [isContactSectionDialogOpen, setIsContactSectionDialogOpen] = useState(false);
 
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -107,6 +110,7 @@ export default function AdminPage() {
     getSocialLinks().then(setSocialLinks);
     getProductsSection().then(setProductsSection);
     getTestimonialsSection().then(setTestimonialsSection);
+    getContactSection().then(setContactSection);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -647,6 +651,24 @@ export default function AdminPage() {
       }
     };
 
+    const handleContactSectionSave = async (newContactSection: ContactSection) => {
+      try {
+        setContactSection(newContactSection);
+        await saveContactSection(newContactSection);
+        toast({
+          title: "Changes Saved",
+          description: "Contact section has been saved successfully.",
+        });
+        setIsContactSectionDialogOpen(false);
+      } catch (error: any) {
+        toast({
+          title: "Save Failed",
+          description: error.message || "Failed to save contact section.",
+          variant: "destructive",
+        });
+      }
+    };
+
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -969,13 +991,19 @@ export default function AdminPage() {
                                 Contact Information
                             </CardTitle>
                             <CardDescription>
-                                Edit the contact details displayed on your site.
+                                Edit the contact details and section text on your site.
                             </CardDescription>
                         </div>
-                        <Button onClick={() => setIsContactInfoDialogOpen(true)} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!contactInfo}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Info
-                        </Button>
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                            <Button onClick={() => setIsContactSectionDialogOpen(true)} className="w-full sm:w-auto" variant="outline" disabled={!contactSection}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Section Text
+                            </Button>
+                            <Button onClick={() => setIsContactInfoDialogOpen(true)} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!contactInfo}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Contact Info
+                            </Button>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {contactInfo ? (
@@ -1132,6 +1160,14 @@ export default function AdminPage() {
           setIsOpen={setIsProductsSectionDialogOpen}
           content={productsSection}
           onSave={handleProductsSectionSave}
+        />
+      )}
+       {contactSection && (
+        <ContactSectionEditDialog
+          isOpen={isContactSectionDialogOpen}
+          setIsOpen={setIsContactSectionDialogOpen}
+          content={contactSection}
+          onSave={handleContactSectionSave}
         />
       )}
     </div>
@@ -2188,6 +2224,60 @@ function TestimonialsSectionEditDialog({ isOpen, setIsOpen, content, onSave }: T
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="testimonials-description" className="text-right">Description</Label>
             <Textarea id="testimonials-description" value={currentContent.description} onChange={(e) => handleContentChange('description', e.target.value)} className="col-span-3" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface ContactSectionEditDialogProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  content: ContactSection;
+  onSave: (content: ContactSection) => void;
+}
+
+function ContactSectionEditDialog({ isOpen, setIsOpen, content, onSave }: ContactSectionEditDialogProps) {
+  const [currentContent, setCurrentContent] = useState<ContactSection>(content);
+
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentContent(content);
+    }
+  }, [isOpen, content]);
+
+  const handleContentChange = (field: 'title' | 'description', value: string) => {
+    setCurrentContent(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = () => {
+    onSave(currentContent);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Contact Section</DialogTitle>
+          <DialogDescription>
+            Update the title and description for the contact section.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="contact-title" className="text-right">Title</Label>
+            <Input id="contact-title" value={currentContent.title} onChange={(e) => handleContentChange('title', e.target.value)} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="contact-description" className="text-right">Description</Label>
+            <Textarea id="contact-description" value={currentContent.description} onChange={(e) => handleContentChange('description', e.target.value)} className="col-span-3" />
           </div>
         </div>
         <DialogFooter>
