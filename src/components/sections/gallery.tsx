@@ -2,29 +2,43 @@
 
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { getGalleryImages, GalleryImage } from '@/lib/gallery';
+import { getGalleryContent, GalleryContent } from '@/lib/gallery';
 
 export function Gallery() {
-  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [content, setContent] = useState<GalleryContent | null>(null);
 
   useEffect(() => {
-    getGalleryImages().then(setGalleryImages);
+    getGalleryContent().then(setContent);
   }, []);
+
+  if (!content) {
+    return (
+      <section id="gallery" className="bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              Loading...
+            </h2>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="gallery" className="bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            From the Fields to Your Door
+            {content.title}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            A glimpse into our process, our products, and the people who make it all happen.
+            {content.description}
           </p>
         </div>
 
         <div className="mt-12 columns-2 gap-4 sm:columns-3 xl:columns-4">
-          {galleryImages.map((image, idx) => (
+          {content.galleryImages.map((image, idx) => (
             <div key={image.id} className="mb-4 break-inside-avoid">
               <Image
                 src={image.imageUrl}

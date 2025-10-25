@@ -10,25 +10,32 @@ async function getGalleryData() {
         return JSON.parse(data);
     } catch (error) {
         // If file doesn't exist, return default structure
-        return { galleryImages: [] };
+        return { 
+            title: "From the Fields to Your Door",
+            description: "A glimpse into our process, our products, and the people who make it all happen.",
+            galleryImages: [] 
+        };
     }
 }
 
 export async function GET() {
   try {
     const data = await getGalleryData();
-    return NextResponse.json(data.galleryImages);
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Error reading gallery file:', error);
-    return NextResponse.json([], { status: 500 });
+    return NextResponse.json({ 
+        title: "Error", 
+        description: "Could not load gallery content.", 
+        galleryImages: [] 
+    }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const galleryImages = await request.json();
-    const dataToSave = { galleryImages };
-    await fs.writeFile(galleryFilePath, JSON.stringify(dataToSave, null, 2));
+    const content = await request.json();
+    await fs.writeFile(galleryFilePath, JSON.stringify(content, null, 2));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error saving gallery file:', error);

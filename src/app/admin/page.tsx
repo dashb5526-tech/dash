@@ -33,7 +33,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getProducts, saveProducts, Product } from "@/lib/products";
-import { getGalleryImages, saveGalleryImages, GalleryImage } from "@/lib/gallery";
+import { getGalleryContent, saveGalleryContent, GalleryContent, GalleryImage } from "@/lib/gallery";
 import { getTestimonials, saveTestimonials, Testimonial } from "@/lib/testimonials";
 import { getPartners, savePartners, Partner } from "@/lib/partners";
 import { getAboutContent, saveAboutContent, AboutContent } from "@/lib/about";
@@ -62,7 +62,7 @@ const iconMap: { [key: string]: React.ReactNode } = {
 
 export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [galleryContent, setGalleryContent] = useState<GalleryContent | null>(null);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
@@ -72,7 +72,8 @@ export default function AdminPage() {
   const [productsSection, setProductsSection] = useState<ProductsSection | null>(null);
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
-  const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
+  const [isGalleryImageDialogOpen, setIsGalleryImageDialogOpen] = useState(false);
+  const [isGallerySectionDialogOpen, setIsGallerySectionDialogOpen] = useState(false);
   const [isTestimonialDialogOpen, setIsTestimonialDialogOpen] = useState(false);
   const [isPartnerDialogOpen, setIsPartnerDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
@@ -93,7 +94,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     getProducts().then(setProducts);
-    getGalleryImages().then(setGalleryImages);
+    getGalleryContent().then(setGalleryContent);
     getTestimonials().then(setTestimonials);
     getPartners().then(setPartners);
     getAboutContent().then(setAboutContent);
@@ -188,17 +189,18 @@ export default function AdminPage() {
     }
   }
 
-  const openGalleryDialogForNew = () => {
+  const openGalleryImageDialogForNew = () => {
     setEditingGalleryImage(null);
-    setIsGalleryDialogOpen(true);
+    setIsGalleryImageDialogOpen(true);
   };
 
-  const openGalleryDialogForEdit = (image: GalleryImage) => {
+  const openGalleryImageDialogForEdit = (image: GalleryImage) => {
     setEditingGalleryImage(image);
-    setIsGalleryDialogOpen(true);
+    setIsGalleryImageDialogOpen(true);
   };
 
-  const handleGallerySave = async (imageData: Omit<GalleryImage, 'imageUrl'>, selectedFile: File | null) => {
+  const handleGalleryImageSave = async (imageData: Omit<GalleryImage, 'imageUrl'>, selectedFile: File | null) => {
+    if (!galleryContent) return;
     try {
       let finalImageUrl = editingGalleryImage?.imageUrl || "";
 
@@ -233,17 +235,19 @@ export default function AdminPage() {
 
       let updatedImages;
       if (editingGalleryImage) {
-        updatedImages = galleryImages.map(img => img.id === editingGalleryImage.id ? newImageData : img);
+        updatedImages = galleryContent.galleryImages.map(img => img.id === editingGalleryImage.id ? newImageData : img);
       } else {
-        updatedImages = [...galleryImages, newImageData];
+        updatedImages = [...galleryContent.galleryImages, newImageData];
       }
-      setGalleryImages(updatedImages);
-      await saveGalleryImages(updatedImages);
+
+      const updatedContent = { ...galleryContent, galleryImages: updatedImages };
+      setGalleryContent(updatedContent);
+      await saveGalleryContent(updatedContent);
       toast({
         title: "Changes Saved",
         description: "Gallery image has been saved successfully.",
       });
-      setIsGalleryDialogOpen(false);
+      setIsGalleryImageDialogOpen(false);
     } catch (error: any) {
       console.error(error);
       toast({
@@ -254,11 +258,13 @@ export default function AdminPage() {
     }
   };
 
-  const handleGalleryDelete = async (id: string) => {
+  const handleGalleryImageDelete = async (id: string) => {
+    if (!galleryContent) return;
     try {
-      const updatedImages = galleryImages.filter(img => img.id !== id);
-      setGalleryImages(updatedImages);
-      await saveGalleryImages(updatedImages);
+      const updatedImages = galleryContent.galleryImages.filter(img => img.id !== id);
+      const updatedContent = { ...galleryContent, galleryImages: updatedImages };
+      setGalleryContent(updatedContent);
+      await saveGalleryContent(updatedContent);
       toast({
         title: "Image Deleted",
         description: "Gallery image has been deleted successfully.",
@@ -271,6 +277,27 @@ export default function AdminPage() {
       });
     }
   };
+
+  const handleGallerySectionSave = async (newGallerySection: Pick<GalleryContent, 'title' | 'description'>) => {
+    if (!galleryContent) return;
+    try {
+      const updatedContent = { ...galleryContent, ...newGallerySection };
+      setGalleryContent(updatedContent);
+      await saveGalleryContent(updatedContent);
+      toast({
+        title: "Changes Saved",
+        description: "Gallery section has been saved successfully.",
+      });
+      setIsGallerySectionDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Save Failed",
+        description: error.message || "Failed to save gallery section.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   const openTestimonialDialogForNew = () => {
     setEditingTestimonial(null);
@@ -748,14 +775,20 @@ export default function AdminPage() {
                         Add, edit, or remove images from your gallery.
                       </CardDescription>
                     </div>
-                    <Button onClick={openGalleryDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Image
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <Button onClick={() => setIsGallerySectionDialogOpen(true)} className="w-full sm:w-auto" variant="outline">
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Section Text
+                        </Button>
+                        <Button onClick={openGalleryImageDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          Add Image
+                        </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {galleryImages.map((image) => (
+                      {galleryContent?.galleryImages.map((image) => (
                         <div key={image.id} className="relative group">
                           <Image
                             src={image.imageUrl}
@@ -765,10 +798,10 @@ export default function AdminPage() {
                             className="rounded-lg object-cover aspect-square"
                           />
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
-                              <Button variant="ghost" size="icon" onClick={() => openGalleryDialogForEdit(image)}>
+                              <Button variant="ghost" size="icon" onClick={() => openGalleryImageDialogForEdit(image)}>
                                 <Edit className="h-5 w-5 text-white" />
                               </Button>
-                              <Button variant="ghost" size="icon" onClick={() => handleGalleryDelete(image.id)}>
+                              <Button variant="ghost" size="icon" onClick={() => handleGalleryImageDelete(image.id)}>
                                 <Trash2 className="h-5 w-5 text-destructive" />
                               </Button>
                           </div>
@@ -999,12 +1032,20 @@ export default function AdminPage() {
         product={editingProduct}
         onSave={handleProductSave}
       />
-      <GalleryEditDialog
-        isOpen={isGalleryDialogOpen}
-        setIsOpen={setIsGalleryDialogOpen}
+      <GalleryImageEditDialog
+        isOpen={isGalleryImageDialogOpen}
+        setIsOpen={setIsGalleryImageDialogOpen}
         image={editingGalleryImage}
-        onSave={handleGallerySave}
+        onSave={handleGalleryImageSave}
       />
+      {galleryContent && (
+        <GallerySectionEditDialog
+          isOpen={isGallerySectionDialogOpen}
+          setIsOpen={setIsGallerySectionDialogOpen}
+          content={galleryContent}
+          onSave={handleGallerySectionSave}
+        />
+      )}
       <TestimonialEditDialog
         isOpen={isTestimonialDialogOpen}
         setIsOpen={setIsTestimonialDialogOpen}
@@ -1228,14 +1269,14 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
     );
 }
 
-interface GalleryEditDialogProps {
+interface GalleryImageEditDialogProps {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
     image: GalleryImage | null;
     onSave: (imageData: Omit<GalleryImage, 'imageUrl'>, selectedFile: File | null) => void;
 }
 
-function GalleryEditDialog({ isOpen, setIsOpen, image, onSave }: GalleryEditDialogProps) {
+function GalleryImageEditDialog({ isOpen, setIsOpen, image, onSave }: GalleryImageEditDialogProps) {
     const [id, setId] = useState("");
     const [description, setDescription] = useState("");
     const [imageHint, setImageHint] = useState("");
@@ -2001,6 +2042,60 @@ function ProductsSectionEditDialog({ isOpen, setIsOpen, content, onSave }: Produ
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="products-description" className="text-right">Description</Label>
             <Textarea id="products-description" value={currentContent.description} onChange={(e) => handleContentChange('description', e.target.value)} className="col-span-3" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface GallerySectionEditDialogProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  content: Pick<GalleryContent, 'title' | 'description'>;
+  onSave: (content: Pick<GalleryContent, 'title' | 'description'>) => void;
+}
+
+function GallerySectionEditDialog({ isOpen, setIsOpen, content, onSave }: GallerySectionEditDialogProps) {
+  const [currentContent, setCurrentContent] = useState(content);
+
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentContent(content);
+    }
+  }, [isOpen, content]);
+
+  const handleContentChange = (field: 'title' | 'description', value: string) => {
+    setCurrentContent(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = () => {
+    onSave(currentContent);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Gallery Section</DialogTitle>
+          <DialogDescription>
+            Update the title and description for the gallery section.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="gallery-title" className="text-right">Title</Label>
+            <Input id="gallery-title" value={currentContent.title} onChange={(e) => handleContentChange('title', e.target.value)} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="gallery-description" className="text-right">Description</Label>
+            <Textarea id="gallery-description" value={currentContent.description} onChange={(e) => handleContentChange('description', e.target.value)} className="col-span-3" />
           </div>
         </div>
         <DialogFooter>
