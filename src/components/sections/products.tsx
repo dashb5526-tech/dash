@@ -86,12 +86,15 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-export function Products() {
+export function Products({ isHomePage = false }: { isHomePage?: boolean }) {
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     getProducts().then(setProducts);
   }, []);
+
+  const displayedProducts = isHomePage ? products.slice(0, 4) : products;
+
   return (
     <section id="products" className="bg-secondary py-16 sm:py-20 lg:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -105,10 +108,17 @@ export function Products() {
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((product) => (
+          {displayedProducts.map((product) => (
             <ProductCard key={product.name} product={product} />
           ))}
         </div>
+        {isHomePage && products.length > 4 && (
+          <div className="mt-16 text-center">
+            <Button asChild size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+              <Link href="/products">See All Products</Link>
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,3 +1,4 @@
+
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/sections/hero";
@@ -12,7 +13,7 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
-        <Products />
+        <Products isHomePage={true} />
         <About />
         <Gallery />
         <Testimonials />
