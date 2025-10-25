@@ -42,17 +42,18 @@ import { getHomeContent, saveHomeContent, HomeContent } from "@/lib/home";
 import { getSocialLinks, saveSocialLinks, SocialLink } from "@/lib/social-links";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, Edit, Trash2, Star, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { XIcon } from "@/components/icons";
 
 
 const iconMap: { [key: string]: React.ReactNode } = {
     Facebook: <Facebook className="h-5 w-5" />,
-    Twitter: <Twitter className="h-5 w-5" />,
+    X: <XIcon className="h-5 w-5" />,
     Instagram: <Instagram className="h-5 w-5" />,
     Linkedin: <Linkedin className="h-5 w-5" />,
 };
@@ -1864,5 +1865,6 @@ function SocialLinkEditDialog({ isOpen, setIsOpen, socialLink, onSave }: SocialL
         </Dialog>
     );
 }
+
 
 

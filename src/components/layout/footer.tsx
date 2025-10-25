@@ -1,14 +1,15 @@
 
+
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
-import { RiceBowl } from "@/components/icons";
+import { RiceBowl, XIcon } from "@/components/icons";
 import { useEffect, useState } from "react";
 import { getContactInfo, ContactInfo } from "@/lib/contact-info";
 import { getHomeContent, HomeContent } from "@/lib/home";
 import { getSocialLinks, SocialLink } from "@/lib/social-links";
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Instagram, Linkedin } from "lucide-react";
 
 const sections = [
   { name: "Home", href: "/" },
@@ -20,7 +21,7 @@ const sections = [
 
 const socialIconMap: { [key: string]: React.ReactNode } = {
   Facebook: <Facebook className="h-5 w-5" />,
-  Twitter: <Twitter className="h-5 w-5" />,
+  X: <XIcon className="h-5 w-5" />,
   Instagram: <Instagram className="h-5 w-5" />,
   Linkedin: <Linkedin className="h-5 w-5" />,
 };
