@@ -28,6 +28,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1536,6 +1537,12 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
                     <DialogDescription>
                         {product ? 'Update the details for this product.' : 'Fill in the details for the new product.'}
                     </DialogDescription>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
                 </DialogHeader>
                 <ScrollArea className="h-[70vh] pr-6">
                     <div className="grid gap-6 py-4">
@@ -1678,6 +1685,12 @@ function GalleryImageEditDialog({ isOpen, setIsOpen, image, onSave }: GalleryIma
                     <DialogDescription>
                         {image ? 'Update the details for this image.' : 'Fill in the details for the new image.'}
                     </DialogDescription>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
                 </DialogHeader>
                 <ScrollArea className="h-[60vh] pr-6">
                     <div className="grid gap-4 py-4">
@@ -1793,6 +1806,12 @@ function TestimonialEditDialog({ isOpen, setIsOpen, testimonial, onSave }: Testi
                     <DialogDescription>
                         {testimonial ? 'Update the details for this testimonial.' : 'Fill in the details for the new testimonial.'}
                     </DialogDescription>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
                 </DialogHeader>
                 <ScrollArea className="h-[70vh] pr-6">
                   <div className="grid gap-4 py-4">
@@ -1922,6 +1941,12 @@ function PartnerEditDialog({ isOpen, setIsOpen, partner, onSave }: PartnerEditDi
                     <DialogDescription>
                         {partner ? 'Update the details for this partner.' : 'Fill in the details for the new partner.'}
                     </DialogDescription>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -2015,6 +2040,12 @@ function CertificateEditDialog({ isOpen, setIsOpen, certificate, onSave }: Certi
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>{certificate ? 'Edit Certificate' : 'Add New Certificate'}</DialogTitle>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -2105,6 +2136,12 @@ function AboutEditDialog({ isOpen, setIsOpen, content, onSave }: AboutEditDialog
                     <DialogDescription>
                         Make changes to the content of your "About Us" page.
                     </DialogDescription>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
                 </DialogHeader>
                 <ScrollArea className="h-[75vh] pr-6">
                     <div className="space-y-6 py-4">
@@ -2214,6 +2251,12 @@ function ContactInfoEditDialog({ isOpen, setIsOpen, info, onSave }: ContactInfoE
                     <DialogDescription>
                         Update the contact details and map image for your website.
                     </DialogDescription>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
                 </DialogHeader>
                 <ScrollArea className="h-[70vh] pr-6">
                     <div className="grid gap-6 py-4">
@@ -2316,6 +2359,12 @@ function HomeEditDialog({ isOpen, setIsOpen, content, onSave }: HomeEditDialogPr
                     <DialogDescription>
                         Make changes to your homepage content and brand identity.
                     </DialogDescription>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
                 </DialogHeader>
                 <ScrollArea className="h-[75vh] pr-6">
                     <div className="space-y-6 py-4">
@@ -2416,6 +2465,12 @@ function SocialLinkEditDialog({ isOpen, setIsOpen, socialLink, onSave }: SocialL
                     <DialogDescription>
                         {socialLink ? 'Update the details for this social link.' : 'Fill in the details for the new social link.'}
                     </DialogDescription>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -2488,6 +2543,12 @@ function ProductsSectionEditDialog({ isOpen, setIsOpen, content, onSave }: Produ
           <DialogDescription>
             Update the title and description for the products section.
           </DialogDescription>
+           <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close</span>
+                </Button>
+            </DialogClose>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -2542,6 +2603,12 @@ function GallerySectionEditDialog({ isOpen, setIsOpen, content, onSave }: Galler
           <DialogDescription>
             Update the title and description for the gallery section.
           </DialogDescription>
+           <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close</span>
+                </Button>
+            </DialogClose>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -2596,6 +2663,12 @@ function TestimonialsSectionEditDialog({ isOpen, setIsOpen, content, onSave }: T
           <DialogDescription>
             Update the title and description for the testimonials section.
           </DialogDescription>
+           <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close</span>
+                </Button>
+            </DialogClose>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -2650,6 +2723,12 @@ function ContactSectionEditDialog({ isOpen, setIsOpen, content, onSave }: Contac
           <DialogDescription>
             Update the title and description for the contact section.
           </DialogDescription>
+           <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close</span>
+                </Button>
+            </DialogClose>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -2701,6 +2780,12 @@ function TermsEditDialog({ isOpen, setIsOpen, content, onSave }: TermsEditDialog
                     <DialogDescription>
                         Make changes to your Terms and Conditions page.
                     </DialogDescription>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
                 </DialogHeader>
                 <ScrollArea className="h-[70vh] pr-6">
                     <div className="space-y-6 py-4">
@@ -2757,6 +2842,12 @@ function CertificatesSectionEditDialog({ isOpen, setIsOpen, content, onSave }: C
           <DialogDescription>
             Update the title and description for the certificates section.
           </DialogDescription>
+          <DialogClose asChild>
+            <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+            </Button>
+          </DialogClose>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
