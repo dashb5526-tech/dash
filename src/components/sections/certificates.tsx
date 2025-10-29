@@ -18,7 +18,7 @@ import { getCertificatesSection, CertificatesSection } from '@/lib/certificates-
 import Autoplay from "embla-carousel-autoplay";
 import { X, ZoomIn, ZoomOut } from "lucide-react";
 
-function getDistance(touches: React.TouchList) {
+function getDistance(touches: React.TouchList | TouchList) {
   return Math.hypot(
     touches[0].pageX - touches[1].pageX,
     touches[0].pageY - touches[1].pageY
@@ -134,7 +134,11 @@ function CertificateLightbox({
       e.preventDefault();
       const newDist = getDistance(e.touches);
       const scaleChange = newDist / lastDistance.current;
-      setScale(prevScale => Math.max(1, Math.min(prevScale * scaleChange, 5)));
+      const newScale = Math.max(1, Math.min(scale * scaleChange, 5))
+      setScale(newScale);
+       if (newScale === 1) {
+        setPosition({ x: 0, y: 0 });
+      }
       lastDistance.current = newDist;
     } else if (e.touches.length === 1 && touchStartPos.current && scale > 1) {
       e.preventDefault();
@@ -159,6 +163,14 @@ function CertificateLightbox({
     }
   };
 
+  const handleDoubleClick = (e: React.MouseEvent<HTMLImageElement>) => {
+      if (scale > 1) {
+          setScale(1);
+          setPosition({ x: 0, y: 0 });
+      } else {
+          setScale(2);
+      }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -184,6 +196,7 @@ function CertificateLightbox({
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
+                onDoubleClick={handleDoubleClick}
             />
         </div>
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full bg-background/80 p-2 shadow-md">
@@ -287,3 +300,4 @@ export function Certificates() {
     </>
   );
 }
+
