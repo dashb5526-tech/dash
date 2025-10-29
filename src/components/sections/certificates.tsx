@@ -219,7 +219,7 @@ export function Certificates() {
   const [selectedImage, setSelectedImage] = useState<{url: string, name: string} | null>(null);
   
   const plugin = useRef(
-    Autoplay({ delay: 4000, stopOnInteraction: true })
+    Autoplay({ delay: 3000, stopOnInteraction: false })
   );
 
   useEffect(() => {
@@ -300,4 +300,3 @@ export function Certificates() {
     </>
   );
 }
-
