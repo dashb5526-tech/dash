@@ -49,7 +49,7 @@ import { getCertificates, saveCertificates, Certificate } from "@/lib/certificat
 import { getCertificatesSection, saveCertificatesSection, CertificatesSection } from "@/lib/certificates-section";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, X } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
