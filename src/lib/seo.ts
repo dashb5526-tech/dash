@@ -6,18 +6,22 @@ export interface SeoContent {
 }
 
 function getBaseUrl() {
+  if (typeof window !== 'undefined') {
+    // We're on the client, return a relative path
+    return '';
+  }
   if (process.env.NEXT_PUBLIC_VERCEL_URL) {
     return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
   }
-  // Assume localhost for development
+  // Assume localhost for development on the server
   return 'http://localhost:9002';
 }
 
 export async function getSeoContent(): Promise<SeoContent | null> {
   try {
     const baseUrl = getBaseUrl();
-    // Using fetch with an absolute URL is required for server-side fetching during build.
-    const response = await fetch(`${baseUrl}/api/seo`, { next: { revalidate: 60 } });
+    const fetchUrl = `${baseUrl}/api/seo`;
+    const response = await fetch(fetchUrl, { next: { revalidate: 60 } });
     
     if (!response.ok) {
        console.error(`Failed to fetch SEO content: ${response.status} ${response.statusText}`);
