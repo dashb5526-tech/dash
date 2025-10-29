@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogClose, DialogTitle } from '@/components/ui/dialog';
 import { useEffect, useRef, useState, WheelEvent } from 'react';
 import { getCertificates, Certificate } from '@/lib/certificates';
 import { getCertificatesSection, CertificatesSection } from '@/lib/certificates-section';
@@ -105,6 +106,7 @@ function CertificateLightbox({
         className="max-w-5xl w-full h-[90vh] bg-transparent border-none shadow-none flex items-center justify-center p-0"
         onWheel={handleWheel}
       >
+        <DialogTitle className="sr-only">{imageName}</DialogTitle>
         <div ref={containerRef} className="relative w-full h-full flex items-center justify-center overflow-hidden">
             <Image
                 ref={imgRef}
