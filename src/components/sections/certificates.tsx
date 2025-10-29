@@ -71,24 +71,26 @@ function CertificateLightbox({
     const startY = e.pageY - position.y;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      const newX = moveEvent.pageX - startX;
-      const newY = moveEvent.pageY - startY;
+      let newX = moveEvent.pageX - startX;
+      let newY = moveEvent.pageY - startY;
 
       // Restrict movement within boundaries
       if (imgRef.current && containerRef.current) {
         const imgRect = imgRef.current.getBoundingClientRect();
         const containerRect = containerRef.current.getBoundingClientRect();
-
-        const maxX = (imgRect.width - containerRect.width) / 2;
-        const maxY = (imgRect.height - containerRect.height) / 2;
-
-        const boundedX = Math.max(-maxX, Math.min(newX, maxX));
-        const boundedY = Math.max(-maxY, Math.min(newY, maxY));
         
-        setPosition({ x: boundedX, y: boundedY });
-      } else {
-        setPosition({ x: newX, y: newY });
+        // Adjust for current scale to get original image dimensions scaled
+        const scaledImgWidth = imgRef.current.offsetWidth * scale;
+        const scaledImgHeight = imgRef.current.offsetHeight * scale;
+        
+        const maxX = Math.max(0, (scaledImgWidth - containerRect.width) / (2 * scale));
+        const maxY = Math.max(0, (scaledImgHeight - containerRect.height) / (2 * scale));
+
+        newX = Math.max(-maxX, Math.min(newX, maxX));
+        newY = Math.max(-maxY, Math.min(newY, maxY));
       }
+      
+      setPosition({ x: newX, y: newY });
     };
 
     const handleMouseUp = () => {
@@ -113,10 +115,11 @@ function CertificateLightbox({
                 src={imageUrl}
                 alt={imageName}
                 fill
-                className="object-contain cursor-grab"
+                className={scale > 1 ? 'cursor-grab' : 'cursor-default'}
                 style={{
                   transform: `scale(${scale}) translateX(${position.x}px) translateY(${position.y}px)`,
-                  transition: 'transform 0.2s ease-out',
+                  transition: 'transform 0.1s linear',
+                  objectFit: 'contain'
                 }}
                 onMouseDown={handleDragStart}
             />
