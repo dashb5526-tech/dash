@@ -78,7 +78,7 @@ function ProductCard({ product }: { product: Product }) {
         )}
 
         <div className="!mt-auto pt-4">
-          <Button asChild variant="outline" size="sm" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+          <Button asChild variant="outline" size="sm" className="w-full border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white">
               <Link href="/contact">Request Quote</Link>
           </Button>
         </div>
