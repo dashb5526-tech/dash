@@ -44,6 +44,7 @@ import { getProductsSection, saveProductsSection, ProductsSection } from "@/lib/
 import { getTestimonialsSection, saveTestimonialsSection, TestimonialsSection } from "@/lib/testimonials-section";
 import { getContactSection, saveContactSection, ContactSection } from "@/lib/contact-section";
 import { getTermsContent, saveTermsContent, TermsContent } from "@/lib/terms";
+import { getCertificates, saveCertificates, Certificate } from "@/lib/certificates";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin } from "lucide-react";
@@ -76,6 +77,7 @@ export default function AdminPage() {
   const [testimonialsSection, setTestimonialsSection] = useState<TestimonialsSection | null>(null);
   const [contactSection, setContactSection] = useState<ContactSection | null>(null);
   const [termsContent, setTermsContent] = useState<TermsContent | null>(null);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
 
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
@@ -91,6 +93,7 @@ export default function AdminPage() {
   const [isProductsSectionDialogOpen, setIsProductsSectionDialogOpen] = useState(false);
   const [isContactSectionDialogOpen, setIsContactSectionDialogOpen] = useState(false);
   const [isTermsDialogOpen, setIsTermsDialogOpen] = useState(false);
+  const [isCertificateDialogOpen, setIsCertificateDialogOpen] = useState(false);
 
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -98,6 +101,7 @@ export default function AdminPage() {
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
   const [editingSocialLink, setEditingSocialLink] = useState<SocialLink | null>(null);
+  const [editingCertificate, setEditingCertificate] = useState<Certificate | null>(null);
 
 
   const { toast } = useToast();
@@ -115,6 +119,7 @@ export default function AdminPage() {
     getTestimonialsSection().then(setTestimonialsSection);
     getContactSection().then(setContactSection);
     getTermsContent().then(setTermsContent);
+    getCertificates().then(setCertificates);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -707,6 +712,84 @@ export default function AdminPage() {
         }
     };
 
+    const openCertificateDialogForNew = () => {
+        setEditingCertificate(null);
+        setIsCertificateDialogOpen(true);
+    };
+
+    const openCertificateDialogForEdit = (cert: Certificate) => {
+        setEditingCertificate(cert);
+        setIsCertificateDialogOpen(true);
+    };
+
+    const handleCertificateSave = async (certData: Certificate, selectedFile: File | null) => {
+        try {
+            let finalImageUrl = certData.imageUrl;
+
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (!response.ok) throw new Error('Image upload failed');
+                const result = await response.json();
+                finalImageUrl = result.imageUrl;
+            }
+
+            if (!finalImageUrl) {
+                toast({
+                    title: "Save Failed",
+                    description: "An image is required.",
+                    variant: "destructive",
+                });
+                return;
+            }
+            
+            const newCertData = { ...certData, imageUrl: finalImageUrl };
+
+            let updatedCerts;
+            if (editingCertificate) {
+                updatedCerts = certificates.map(c => c.id === editingCertificate.id ? newCertData : c);
+            } else {
+                updatedCerts = [...certificates, newCertData];
+            }
+            setCertificates(updatedCerts);
+            await saveCertificates(updatedCerts);
+            toast({
+                title: "Changes Saved",
+                description: "Certificate has been saved successfully.",
+            });
+            setIsCertificateDialogOpen(false);
+        } catch (error: any) {
+            console.error(error);
+            toast({
+                title: "Save Failed",
+                description: error.message || "Failed to save certificate.",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const handleCertificateDelete = async (id: string) => {
+        try {
+            const updatedCerts = certificates.filter(c => c.id !== id);
+            setCertificates(updatedCerts);
+            await saveCertificates(updatedCerts);
+            toast({
+                title: "Certificate Deleted",
+                description: "Certificate has been deleted successfully.",
+            });
+        } catch (error) {
+            toast({
+                title: "Delete Failed",
+                description: "Failed to delete certificate.",
+                variant: "destructive",
+            });
+        }
+    };
+
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -721,6 +804,7 @@ export default function AdminPage() {
                 <TabsTrigger value="products">Products</TabsTrigger>
                 <TabsTrigger value="gallery">Gallery</TabsTrigger>
                 <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
+                <TabsTrigger value="certificates">Certificates</TabsTrigger>
                 <TabsTrigger value="partners">Partners</TabsTrigger>
                 <TabsTrigger value="contact">Contact</TabsTrigger>
                 <TabsTrigger value="social">Social Media</TabsTrigger>
@@ -960,6 +1044,57 @@ export default function AdminPage() {
                                 <span className="sr-only">Edit</span>
                               </Button>
                               <Button variant="ghost" size="icon" onClick={() => handleTestimonialDelete(testimonial.id)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                                 <span className="sr-only">Delete</span>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="certificates" className="pt-6">
+                <Card>
+                  <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="font-headline text-2xl">
+                        Certificate Management
+                      </CardTitle>
+                      <CardDescription>
+                        Manage your company's legal and quality certificates.
+                      </CardDescription>
+                    </div>
+                    <Button onClick={openCertificateDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Certificate
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Certificate Name</TableHead>
+                          <TableHead className="hidden sm:table-cell">Image</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {certificates.map((cert) => (
+                          <TableRow key={cert.id}>
+                            <TableCell className="font-medium">{cert.name}</TableCell>
+                            <TableCell className="hidden sm:table-cell">
+                              {cert.imageUrl && (
+                                <Image src={cert.imageUrl} alt={cert.name} width={100} height={70} className="object-contain rounded" />
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="icon" onClick={() => openCertificateDialogForEdit(cert)}>
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleCertificateDelete(cert.id)}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
                                  <span className="sr-only">Delete</span>
                               </Button>
@@ -1247,6 +1382,12 @@ export default function AdminPage() {
             onSave={handleTermsSave}
         />
       )}
+      <CertificateEditDialog
+          isOpen={isCertificateDialogOpen}
+          setIsOpen={setIsCertificateDialogOpen}
+          certificate={editingCertificate}
+          onSave={handleCertificateSave}
+      />
     </div>
   );
 }
@@ -1759,6 +1900,99 @@ function PartnerEditDialog({ isOpen, setIsOpen, partner, onSave }: PartnerEditDi
                           {previewUrl && (
                               <div className="mt-2">
                                   <Image src={previewUrl} alt="Preview" width={100} height={40} className="object-contain rounded" />
+                              </div>
+                          )}
+                      </div>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+interface CertificateEditDialogProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    certificate: Certificate | null;
+    onSave: (certData: Certificate, selectedFile: File | null) => void;
+}
+
+function CertificateEditDialog({ isOpen, setIsOpen, certificate, onSave }: CertificateEditDialogProps) {
+    const [id, setId] = useState("");
+    const [name, setName] = useState("");
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (isOpen) {
+            if (certificate) {
+                setId(certificate.id);
+                setName(certificate.name);
+                setPreviewUrl(certificate.imageUrl);
+            } else {
+                setId(`cert-${Date.now()}`);
+                setName("");
+                setPreviewUrl(null);
+            }
+            setSelectedFile(null);
+        }
+    }, [certificate, isOpen]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB
+                toast({
+                    title: "File Too Large",
+                    description: "Please select an image smaller than 5MB.",
+                    variant: "destructive",
+                });
+                return;
+            }
+            setSelectedFile(file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!name) {
+            toast({ title: "Missing Name", description: "Please enter the certificate name.", variant: "destructive" });
+            return;
+        }
+
+        if (!previewUrl && !selectedFile) {
+            toast({ title: "Missing Image", description: "Please select an image.", variant: "destructive" });
+            return;
+        }
+
+        const certData: Certificate = { id, name, imageUrl: certificate?.imageUrl || "" };
+        onSave(certData, selectedFile);
+    }
+    
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{certificate ? 'Edit Certificate' : 'Add New Certificate'}</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="cert-name" className="text-right">Certificate Name</Label>
+                        <Input id="cert-name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label className="text-right">Certificate Image</Label>
+                      <div className="col-span-3">
+                          <input type="file" accept="image/*" onChange={handleFileChange} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+                          <p className="text-xs text-muted-foreground mt-2">Max file size: 5MB</p>
+                          {previewUrl && (
+                              <div className="mt-2">
+                                  <Image src={previewUrl} alt="Preview" width={100} height={70} className="object-contain rounded" />
                               </div>
                           )}
                       </div>
@@ -2451,5 +2685,7 @@ function TermsEditDialog({ isOpen, setIsOpen, content, onSave }: TermsEditDialog
         </Dialog>
     );
 }
+
+    
 
     

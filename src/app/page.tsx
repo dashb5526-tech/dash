@@ -6,6 +6,7 @@ import { Gallery } from "@/components/sections/gallery";
 import { Testimonials } from "@/components/sections/testimonials";
 import { Products } from "@/components/sections/products";
 import { About } from "@/components/sections/about";
+import { Certificates } from "@/components/sections/certificates";
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
         <Hero />
         <About />
         <Products isHomePage={true} />
+        <Certificates />
         <Gallery />
         <Testimonials />
       </main>
@@ -22,3 +24,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
