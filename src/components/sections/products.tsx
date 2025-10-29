@@ -21,35 +21,75 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <Card className="flex flex-col overflow-hidden transition-shadow duration-300 hover:shadow-xl">
-      {imageSrc && (
-          <div className="relative h-32 sm:h-56 w-full">
-            <Image
-              src={imageSrc}
-              alt={product.name}
-              fill
-              className="object-cover"
-              data-ai-hint={imageHint}
-            />
-          </div>
-        )}
-      <CardHeader className="p-2 sm:p-4">
-        <CardTitle className="font-headline text-base sm:text-xl line-clamp-2">
-          <Link href={productUrl} className="hover:text-primary transition-colors">
-            {product.name}
-          </Link>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col p-2 pt-0 sm:p-4 sm:pt-0 space-y-4">
-        <CardDescription className="text-xs sm:text-sm line-clamp-3">
-          {product.description}
-        </CardDescription>
+      <Link href={productUrl}>
+        {imageSrc && (
+            <div className="relative h-56 w-full">
+              <Image
+                src={imageSrc}
+                alt={product.name}
+                fill
+                className="object-cover"
+                data-ai-hint={imageHint}
+              />
+            </div>
+          )}
+      </Link>
+      <div className="p-4 flex flex-col flex-1">
+        <CardHeader className="p-0">
+          <CardTitle className="font-headline text-xl">
+             <Link href={productUrl} className="hover:text-primary transition-colors">
+                {product.name}
+              </Link>
+          </CardTitle>
+          <CardDescription className="pt-2">
+            {product.description}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 pt-4 flex-1 flex flex-col gap-4">
+           {product.specifications && product.specifications.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-base mb-2">Specifications:</h3>
+                  <ul className="space-y-1 text-sm text-muted-foreground list-disc list-inside">
+                    {product.specifications.map((spec, i) => (
+                      <li key={i}>
+                        <span className="font-medium text-foreground">{spec.key}:</span> {spec.value}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-        <div className="!mt-auto pt-4 flex flex-col sm:flex-row gap-2">
+              {product.varieties && product.varieties.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-base mb-2">Available Varieties:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.varieties.map((variety) => (
+                      <Badge key={variety} variant="secondary">{variety}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {product.certifications && product.certifications.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-base mb-2">Certifications:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.certifications.map((cert) => (
+                      <Badge key={cert} className="bg-green-100 text-green-800 border-green-200 hover:bg-green-200">
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1"/>
+                        {cert}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+        </CardContent>
+        <div className="!mt-auto pt-4">
           <Button asChild className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-              <Link href={productUrl}>View Details</Link>
+              <Link href="/contact">Request a Quote</Link>
           </Button>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }
@@ -63,7 +103,7 @@ export function Products({ isHomePage = false }: { isHomePage?: boolean }) {
     getProductsSection().then(setSectionContent);
   }, []);
 
-  const displayedProducts = isHomePage ? products.slice(0, 4) : products;
+  const displayedProducts = isHomePage ? products.slice(0, 3) : products;
 
   return (
     <section id="products" className="bg-secondary py-16 sm:py-20 lg:py-24">
@@ -77,12 +117,12 @@ export function Products({ isHomePage = false }: { isHomePage?: boolean }) {
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {displayedProducts.map((product) => (
             <ProductCard key={product.name} product={product} />
           ))}
         </div>
-        {isHomePage && products.length > 4 && (
+        {isHomePage && products.length > 3 && (
           <div className="mt-16 text-center">
             <Button asChild size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
               <Link href="/products">See All Products</Link>
