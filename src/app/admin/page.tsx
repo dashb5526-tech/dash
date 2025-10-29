@@ -50,7 +50,7 @@ import { getCertificatesSection, saveCertificatesSection, CertificatesSection } 
 import { getSeoContent, saveSeoContent, SeoContent } from "@/lib/seo";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, X } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, X, Image as ImageIcon } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -952,7 +952,7 @@ export default function AdminPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Product Name</TableHead>
+                          <TableHead>Product</TableHead>
                           <TableHead className="hidden sm:table-cell">Description</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -960,7 +960,18 @@ export default function AdminPage() {
                       <TableBody>
                         {products.map((product) => (
                           <TableRow key={product.name}>
-                            <TableCell className="font-medium">{product.name}</TableCell>
+                            <TableCell className="font-medium">
+                               <div className="flex items-center gap-3">
+                                {product.imageUrl ? (
+                                    <Image src={product.imageUrl} alt={product.name} width={40} height={40} className="rounded-sm object-cover" />
+                                ) : (
+                                    <div className="h-10 w-10 flex items-center justify-center bg-muted rounded-sm">
+                                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                                    </div>
+                                )}
+                                <span>{product.name}</span>
+                               </div>
+                            </TableCell>
                             <TableCell className="hidden text-muted-foreground sm:table-cell">{product.description}</TableCell>
                             <TableCell className="text-right">
                               <Button variant="ghost" size="icon" onClick={() => openProductDialogForEdit(product)}>
