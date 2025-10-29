@@ -3,7 +3,6 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/sections/hero";
 import { Gallery } from "@/components/sections/gallery";
-import { Testimonials } from "@/components/sections/testimonials";
 import { Products } from "@/components/sections/products";
 import { About } from "@/components/sections/about";
 import { Certificates } from "@/components/sections/certificates";
@@ -18,11 +17,8 @@ export default function Home() {
         <Products isHomePage={true} />
         <Certificates />
         <Gallery />
-        <Testimonials />
       </main>
       <Footer />
     </div>
   );
 }
-
-    
