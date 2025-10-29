@@ -16,24 +16,18 @@ function getBaseUrl() {
 export async function getSeoContent(): Promise<SeoContent | null> {
   try {
     const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}/api/seo`, { next: { revalidate: 60 } }); // Add revalidation
+    // Using fetch with an absolute URL is required for server-side fetching during build.
+    const response = await fetch(`${baseUrl}/api/seo`, { next: { revalidate: 60 } });
+    
     if (!response.ok) {
-      throw new Error('Failed to fetch SEO content');
+       console.error(`Failed to fetch SEO content: ${response.status} ${response.statusText}`);
+       return null;
     }
+
     return await response.json();
   } catch (error) {
-    console.error('Error reading SEO content:', error);
-    // Fallback for build time or error
-     try {
-      const fs = require('fs').promises;
-      const path = require('path');
-      const seoFilePath = path.join(process.cwd(), 'src/lib/seo.json');
-      const data = await fs.readFile(seoFilePath, 'utf8');
-      return JSON.parse(data);
-    } catch (fsError) {
-      console.error('Error reading SEO fallback file:', fsError);
-      return null;
-    }
+    console.error('Error fetching SEO content:', error);
+    return null;
   }
 }
 
