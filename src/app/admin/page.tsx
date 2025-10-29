@@ -50,7 +50,7 @@ import { getCertificatesSection, saveCertificatesSection, CertificatesSection } 
 import { getSeoContent, saveSeoContent, SeoContent } from "@/lib/seo";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, X as XIcon, Image as ImageIcon } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, X as XIcon, Image as ImageIcon, Lock } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -66,8 +66,60 @@ const iconMap: { [key: string]: React.ReactNode } = {
     Linkedin: <Linkedin className="h-5 w-5" />,
 };
 
+function Login({ onLoginSuccess }: { onLoginSuccess: () => void }) {
+    const [password, setPassword] = useState('');
+    const { toast } = useToast();
+
+    const handleLogin = () => {
+        if (password === 'SBS') {
+            sessionStorage.setItem('isAdminAuthenticated', 'true');
+            onLoginSuccess();
+            toast({
+                title: "Access Granted",
+                description: "Welcome to the admin panel.",
+            });
+        } else {
+            toast({
+                title: "Access Denied",
+                description: "Incorrect password.",
+                variant: "destructive",
+            });
+        }
+    };
+
+    return (
+        <div className="flex min-h-[60vh] items-center justify-center bg-secondary">
+            <Card className="w-full max-w-sm">
+                <CardHeader className="text-center">
+                    <CardTitle className="font-headline text-2xl">Admin Access</CardTitle>
+                    <CardDescription>Enter the password to manage the website.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                                className="pl-10"
+                            />
+                        </div>
+                    </div>
+                    <Button onClick={handleLogin} className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                        Unlock
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+    );
+}
 
 export default function AdminPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [galleryContent, setGalleryContent] = useState<GalleryContent | null>(null);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -114,22 +166,30 @@ export default function AdminPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    getProducts().then(setProducts);
-    getGalleryContent().then(setGalleryContent);
-    getTestimonials().then(setTestimonials);
-    getPartners().then(setPartners);
-    getAboutContent().then(setAboutContent);
-    getContactInfo().then(setContactInfo);
-    getHomeContent().then(setHomeContent);
-    getSocialLinks().then(setSocialLinks);
-    getProductsSection().then(setProductsSection);
-    getTestimonialsSection().then(setTestimonialsSection);
-    getContactSection().then(setContactSection);
-    getTermsContent().then(setTermsContent);
-    getCertificates().then(setCertificates);
-    getCertificatesSection().then(setCertificatesSection);
-    getSeoContent().then(setSeoContent);
+    if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
+        setIsAuthenticated(true);
+    }
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+        getProducts().then(setProducts);
+        getGalleryContent().then(setGalleryContent);
+        getTestimonials().then(setTestimonials);
+        getPartners().then(setPartners);
+        getAboutContent().then(setAboutContent);
+        getContactInfo().then(setContactInfo);
+        getHomeContent().then(setHomeContent);
+        getSocialLinks().then(setSocialLinks);
+        getProductsSection().then(setProductsSection);
+        getTestimonialsSection().then(setTestimonialsSection);
+        getContactSection().then(setContactSection);
+        getTermsContent().then(setTermsContent);
+        getCertificates().then(setCertificates);
+        getCertificatesSection().then(setCertificatesSection);
+        getSeoContent().then(setSeoContent);
+    }
+  }, [isAuthenticated]);
 
   const openProductDialogForNew = () => {
     setEditingProduct(null);
@@ -839,8 +899,11 @@ export default function AdminPage() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
-      <main className="flex-1 bg-secondary">
-        <section className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex-1">
+        {!isAuthenticated ? (
+            <Login onLoginSuccess={() => setIsAuthenticated(true)} />
+        ) : (
+        <section className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 bg-secondary">
           <Tabs defaultValue="home" className="mx-auto max-w-4xl">
             <ScrollArea className="w-full whitespace-nowrap rounded-lg">
               <TabsList className="inline-flex w-auto">
@@ -1387,6 +1450,7 @@ export default function AdminPage() {
             </TabsContent>
           </Tabs>
         </section>
+        )}
       </main>
       <Footer />
       <ProductEditDialog 
@@ -3080,3 +3144,5 @@ function SeoEditDialog({ isOpen, setIsOpen, content, onSave }: SeoEditDialogProp
         </Dialog>
     );
 }
+
+    
