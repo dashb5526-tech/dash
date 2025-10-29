@@ -47,13 +47,13 @@ export function Header() {
       )}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex flex-shrink-0 items-center gap-2">
            {homeContent?.brand.logoUrl ? (
               <Image src={homeContent.brand.logoUrl} alt={homeContent.brand.name} width={40} height={40} className="h-8 w-auto object-contain" />
             ) : (
               <RiceBowl className="h-8 w-8 text-primary" />
             )}
-          <span className="font-headline text-2xl font-bold text-foreground">
+          <span className="font-headline text-xl font-bold text-foreground sm:text-2xl">
             {homeContent?.brand.name || "Dash Rice"}
           </span>
         </Link>
@@ -70,7 +70,7 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
            <Button asChild className="hidden md:inline-flex" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
             <Link href="/contact">Order Now</Link>
           </Button>
