@@ -12,11 +12,18 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogClose, DialogTitle } from '@/components/ui/dialog';
-import { useEffect, useRef, useState, WheelEvent } from 'react';
+import { useEffect, useRef, useState, WheelEvent, TouchEvent } from 'react';
 import { getCertificates, Certificate } from '@/lib/certificates';
 import { getCertificatesSection, CertificatesSection } from '@/lib/certificates-section';
 import Autoplay from "embla-carousel-autoplay";
 import { X, ZoomIn, ZoomOut } from "lucide-react";
+
+function getDistance(touches: React.TouchList) {
+  return Math.hypot(
+    touches[0].pageX - touches[1].pageX,
+    touches[0].pageY - touches[1].pageY
+  );
+}
 
 function CertificateLightbox({
   isOpen,
@@ -33,12 +40,17 @@ function CertificateLightbox({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastDistance = useRef<number | null>(null);
+  const touchStartPos = useRef<{x: number, y: number} | null>(null);
+
 
   useEffect(() => {
     // Reset zoom and position when the dialog opens
     if (isOpen) {
       setScale(1);
       setPosition({ x: 0, y: 0 });
+      lastDistance.current = null;
+      touchStartPos.current = null;
     }
   }, [isOpen]);
 
@@ -63,6 +75,26 @@ function CertificateLightbox({
         setPosition({ x: 0, y: 0 });
     }
   };
+  
+   const clampPosition = (pos: {x: number, y: number}, currentScale: number) => {
+    if (imgRef.current && containerRef.current) {
+        const imgRect = imgRef.current.getBoundingClientRect();
+        const containerRect = containerRef.current.getBoundingClientRect();
+
+        const scaledImgWidth = imgRef.current.offsetWidth * currentScale;
+        const scaledImgHeight = imgRef.current.offsetHeight * currentScale;
+
+        const maxX = Math.max(0, (scaledImgWidth - containerRect.width) / (2 * currentScale));
+        const maxY = Math.max(0, (scaledImgHeight - containerRect.height) / (2 * currentScale));
+        
+        return {
+            x: Math.max(-maxX, Math.min(pos.x, maxX)),
+            y: Math.max(-maxY, Math.min(pos.y, maxY)),
+        };
+    }
+    return pos;
+  };
+
 
   const handleDragStart = (e: React.MouseEvent<HTMLImageElement>) => {
     if (scale <= 1) return;
@@ -71,26 +103,11 @@ function CertificateLightbox({
     const startY = e.pageY - position.y;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      let newX = moveEvent.pageX - startX;
-      let newY = moveEvent.pageY - startY;
-
-      // Restrict movement within boundaries
-      if (imgRef.current && containerRef.current) {
-        const imgRect = imgRef.current.getBoundingClientRect();
-        const containerRect = containerRef.current.getBoundingClientRect();
-        
-        // Adjust for current scale to get original image dimensions scaled
-        const scaledImgWidth = imgRef.current.offsetWidth * scale;
-        const scaledImgHeight = imgRef.current.offsetHeight * scale;
-        
-        const maxX = Math.max(0, (scaledImgWidth - containerRect.width) / (2 * scale));
-        const maxY = Math.max(0, (scaledImgHeight - containerRect.height) / (2 * scale));
-
-        newX = Math.max(-maxX, Math.min(newX, maxX));
-        newY = Math.max(-maxY, Math.min(newY, maxY));
-      }
-      
-      setPosition({ x: newX, y: newY });
+      let newPos = {
+        x: moveEvent.pageX - startX,
+        y: moveEvent.pageY - startY,
+      };
+      setPosition(clampPosition(newPos, scale));
     };
 
     const handleMouseUp = () => {
@@ -101,6 +118,47 @@ function CertificateLightbox({
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
+  
+  const handleTouchStart = (e: React.TouchEvent<HTMLImageElement>) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      lastDistance.current = getDistance(e.touches);
+    } else if (e.touches.length === 1 && scale > 1) {
+      e.preventDefault();
+      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLImageElement>) => {
+    if (e.touches.length === 2 && lastDistance.current !== null) {
+      e.preventDefault();
+      const newDist = getDistance(e.touches);
+      const scaleChange = newDist / lastDistance.current;
+      setScale(prevScale => Math.max(1, Math.min(prevScale * scaleChange, 5)));
+      lastDistance.current = newDist;
+    } else if (e.touches.length === 1 && touchStartPos.current && scale > 1) {
+      e.preventDefault();
+      const deltaX = e.touches[0].clientX - touchStartPos.current.x;
+      const deltaY = e.touches[0].clientY - touchStartPos.current.y;
+      
+      let newPos = {
+        x: position.x + deltaX,
+        y: position.y + deltaY
+      };
+      
+      setPosition(clampPosition(newPos, scale));
+      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+  };
+  
+  const handleTouchEnd = (e: React.TouchEvent<HTMLImageElement>) => {
+    lastDistance.current = null;
+    touchStartPos.current = null;
+    if (scale === 1) {
+      setPosition({ x: 0, y: 0 });
+    }
+  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -119,9 +177,13 @@ function CertificateLightbox({
                 style={{
                   transform: `scale(${scale}) translateX(${position.x}px) translateY(${position.y}px)`,
                   transition: 'transform 0.1s linear',
-                  objectFit: 'contain'
+                  objectFit: 'contain',
+                  touchAction: 'none'
                 }}
                 onMouseDown={handleDragStart}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
             />
         </div>
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full bg-background/80 p-2 shadow-md">
