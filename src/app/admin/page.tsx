@@ -45,6 +45,7 @@ import { getTestimonialsSection, saveTestimonialsSection, TestimonialsSection } 
 import { getContactSection, saveContactSection, ContactSection } from "@/lib/contact-section";
 import { getTermsContent, saveTermsContent, TermsContent } from "@/lib/terms";
 import { getCertificates, saveCertificates, Certificate } from "@/lib/certificates";
+import { getCertificatesSection, saveCertificatesSection, CertificatesSection } from "@/lib/certificates-section";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin } from "lucide-react";
@@ -78,6 +79,7 @@ export default function AdminPage() {
   const [contactSection, setContactSection] = useState<ContactSection | null>(null);
   const [termsContent, setTermsContent] = useState<TermsContent | null>(null);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [certificatesSection, setCertificatesSection] = useState<CertificatesSection | null>(null);
 
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
@@ -94,6 +96,7 @@ export default function AdminPage() {
   const [isContactSectionDialogOpen, setIsContactSectionDialogOpen] = useState(false);
   const [isTermsDialogOpen, setIsTermsDialogOpen] = useState(false);
   const [isCertificateDialogOpen, setIsCertificateDialogOpen] = useState(false);
+  const [isCertificatesSectionDialogOpen, setIsCertificatesSectionDialogOpen] = useState(false);
 
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -120,6 +123,7 @@ export default function AdminPage() {
     getContactSection().then(setContactSection);
     getTermsContent().then(setTermsContent);
     getCertificates().then(setCertificates);
+    getCertificatesSection().then(setCertificatesSection);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -790,6 +794,24 @@ export default function AdminPage() {
         }
     };
 
+    const handleCertificatesSectionSave = async (newCertificatesSection: CertificatesSection) => {
+      try {
+        setCertificatesSection(newCertificatesSection);
+        await saveCertificatesSection(newCertificatesSection);
+        toast({
+          title: "Changes Saved",
+          description: "Certificates section has been saved successfully.",
+        });
+        setIsCertificatesSectionDialogOpen(false);
+      } catch (error: any) {
+        toast({
+          title: "Save Failed",
+          description: error.message || "Failed to save certificates section.",
+          variant: "destructive",
+        });
+      }
+    };
+
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -1066,10 +1088,16 @@ export default function AdminPage() {
                         Manage your company's legal and quality certificates.
                       </CardDescription>
                     </div>
-                    <Button onClick={openCertificateDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Certificate
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <Button onClick={() => setIsCertificatesSectionDialogOpen(true)} className="w-full sm:w-auto" variant="outline" disabled={!certificatesSection}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Section Text
+                        </Button>
+                        <Button onClick={openCertificateDialogForNew} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          Add Certificate
+                        </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <Table>
@@ -1388,6 +1416,14 @@ export default function AdminPage() {
           certificate={editingCertificate}
           onSave={handleCertificateSave}
       />
+       {certificatesSection && (
+        <CertificatesSectionEditDialog
+          isOpen={isCertificatesSectionDialogOpen}
+          setIsOpen={setIsCertificatesSectionDialogOpen}
+          content={certificatesSection}
+          onSave={handleCertificatesSectionSave}
+        />
+      )}
     </div>
   );
 }
@@ -2686,6 +2722,59 @@ function TermsEditDialog({ isOpen, setIsOpen, content, onSave }: TermsEditDialog
     );
 }
 
+interface CertificatesSectionEditDialogProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  content: CertificatesSection;
+  onSave: (content: CertificatesSection) => void;
+}
+
+function CertificatesSectionEditDialog({ isOpen, setIsOpen, content, onSave }: CertificatesSectionEditDialogProps) {
+  const [currentContent, setCurrentContent] = useState<CertificatesSection>(content);
+
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentContent(content);
+    }
+  }, [isOpen, content]);
+
+  const handleContentChange = (field: 'title' | 'description', value: string) => {
+    setCurrentContent(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = () => {
+    onSave(currentContent);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Certificates Section</DialogTitle>
+          <DialogDescription>
+            Update the title and description for the certificates section.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="certificates-title" className="text-right">Title</Label>
+            <Input id="certificates-title" value={currentContent.title} onChange={(e) => handleContentChange('title', e.target.value)} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="certificates-description" className="text-right">Description</Label>
+            <Textarea id="certificates-description" value={currentContent.description} onChange={(e) => handleContentChange('description', e.target.value)} className="col-span-3" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
     
 
     

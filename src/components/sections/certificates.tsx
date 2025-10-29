@@ -11,16 +11,19 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEffect, useRef, useState } from 'react';
 import { getCertificates, Certificate } from '@/lib/certificates';
+import { getCertificatesSection, CertificatesSection } from '@/lib/certificates-section';
 import Autoplay from "embla-carousel-autoplay";
 
 export function Certificates() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [sectionContent, setSectionContent] = useState<CertificatesSection | null>(null);
   const plugin = useRef(
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
   useEffect(() => {
     getCertificates().then(setCertificates);
+    getCertificatesSection().then(setSectionContent);
   }, []);
 
   if (certificates.length === 0) {
@@ -32,10 +35,10 @@ export function Certificates() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Our Certifications
+            {sectionContent?.title || "Our Certifications"}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            We are committed to quality and safety, backed by industry-standard certifications.
+            {sectionContent?.description || "We are committed to quality and safety, backed by industry-standard certifications."}
           </p>
         </div>
 
