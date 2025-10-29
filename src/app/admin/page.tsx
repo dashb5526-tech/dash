@@ -50,13 +50,13 @@ import { getCertificatesSection, saveCertificatesSection, CertificatesSection } 
 import { getSeoContent, saveSeoContent, SeoContent } from "@/lib/seo";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, X as XIcon, Image as ImageIcon, Lock } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, Image as ImageIcon, Lock, X } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X } from "lucide-react";
+import { XIcon } from "@/components/icons";
 
 
 const iconMap: { [key: string]: React.ReactNode } = {
@@ -72,7 +72,6 @@ function Login({ onLoginSuccess }: { onLoginSuccess: () => void }) {
 
     const handleLogin = () => {
         if (password === 'SBS') {
-            sessionStorage.setItem('isAdminAuthenticated', 'true');
             onLoginSuccess();
             toast({
                 title: "Access Granted",
@@ -164,12 +163,6 @@ export default function AdminPage() {
 
 
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
-        setIsAuthenticated(true);
-    }
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
