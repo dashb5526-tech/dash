@@ -25,7 +25,7 @@ export function Testimonials() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [sectionContent, setSectionContent] = useState<TestimonialsSection | null>(null);
   const plugin = useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true })
+    Autoplay({ delay: 3000, stopOnInteraction: false })
   );
 
   useEffect(() => {
