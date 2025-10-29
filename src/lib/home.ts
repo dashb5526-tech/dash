@@ -12,6 +12,11 @@ export interface HomeContent {
         imageUrl: string;
         imageHint: string;
     };
+    seo: {
+        title: string;
+        description: string;
+        keywords: string;
+    };
 }
 
 function getBaseUrl() {

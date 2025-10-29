@@ -35,5 +35,10 @@
         "description": "Premium, export-quality rice for our international clients across the globe."
       }
     ]
+  },
+  "seo": {
+    "title": "About Dash Rice Traders",
+    "description": "Learn about Dash Rice Traders, our legacy of quality, and our commitment to providing the best rice.",
+    "keywords": "about us, rice company, rice legacy, quality rice"
   }
 }

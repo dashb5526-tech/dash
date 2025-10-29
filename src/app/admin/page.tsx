@@ -50,13 +50,13 @@ import { getCertificatesSection, saveCertificatesSection, CertificatesSection } 
 import { getSeoContent, saveSeoContent, SeoContent } from "@/lib/seo";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, X, Image as ImageIcon } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, X as XIcon, Image as ImageIcon } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { XIcon } from "@/components/icons";
+import { X } from "lucide-react";
 
 
 const iconMap: { [key: string]: React.ReactNode } = {
@@ -2211,6 +2211,13 @@ function AboutEditDialog({ isOpen, setIsOpen, content, onSave }: AboutEditDialog
             main: { ...prev.main, [field]: value }
         }));
     };
+    
+    const handleSeoChange = (field: 'title' | 'description' | 'keywords', value: string) => {
+        setCurrentContent(prev => ({
+            ...prev,
+            seo: { ...prev.seo, [field]: value }
+        }));
+    };
 
     const handleServiceChange = (index: number, field: 'title' | 'description', value: string) => {
         const newItems = [...currentContent.services.items];
@@ -2298,6 +2305,24 @@ function AboutEditDialog({ isOpen, setIsOpen, content, onSave }: AboutEditDialog
                                 </Card>
                             ))}
                         </div>
+                        
+                        <div className="space-y-4 pt-4 border-t mt-6">
+                            <h3 className="text-lg font-medium">About Page SEO</h3>
+                             <div className="grid gap-4">
+                                <Label htmlFor="about-seoTitle">SEO Title</Label>
+                                <Input id="about-seoTitle" value={currentContent.seo.title} onChange={(e) => handleSeoChange('title', e.target.value)} placeholder="Custom title for search engines" />
+                            </div>
+                            <div className="grid gap-4">
+                                <Label htmlFor="about-seoDescription">SEO Description</Label>
+                                <Textarea id="about-seoDescription" value={currentContent.seo.description} onChange={(e) => handleSeoChange('description', e.target.value)} placeholder="Custom description for search engines" />
+                            </div>
+                            <div className="grid gap-4">
+                                <Label htmlFor="about-seoKeywords">SEO Keywords</Label>
+                                <Input id="about-seoKeywords" value={currentContent.seo.keywords} onChange={(e) => handleSeoChange('keywords', e.target.value)} placeholder="e.g., about us, rice company" />
+                                 <p className="text-xs text-muted-foreground">Enter keywords separated by commas.</p>
+                            </div>
+                        </div>
+
                     </div>
                 </ScrollArea>
                 <DialogFooter>
@@ -2431,7 +2456,7 @@ function HomeEditDialog({ isOpen, setIsOpen, content, onSave }: HomeEditDialogPr
         }
     }, [isOpen, content]);
 
-    const handleContentChange = (section: 'brand' | 'hero', field: string, value: string) => {
+    const handleContentChange = (section: 'brand' | 'hero' | 'seo', field: string, value: string) => {
         setCurrentContent(prev => ({
             ...prev,
             [section]: { ...prev[section], [field]: value }
@@ -2512,6 +2537,23 @@ function HomeEditDialog({ isOpen, setIsOpen, content, onSave }: HomeEditDialogPr
                          <div className="grid gap-4">
                             <Label>Image Hint</Label>
                             <Input value={currentContent.hero.imageHint} onChange={e => handleContentChange('hero', 'imageHint', e.target.value)} />
+                        </div>
+                        
+                        <div className="space-y-4 pt-4 border-t mt-6">
+                            <h3 className="text-lg font-medium">Home Page SEO</h3>
+                             <div className="grid gap-4">
+                                <Label htmlFor="home-seoTitle">SEO Title</Label>
+                                <Input id="home-seoTitle" value={currentContent.seo.title} onChange={(e) => handleContentChange('seo', 'title', e.target.value)} placeholder="Custom title for search engines" />
+                            </div>
+                            <div className="grid gap-4">
+                                <Label htmlFor="home-seoDescription">SEO Description</Label>
+                                <Textarea id="home-seoDescription" value={currentContent.seo.description} onChange={(e) => handleContentChange('seo', 'description', e.target.value)} placeholder="Custom description for search engines" />
+                            </div>
+                            <div className="grid gap-4">
+                                <Label htmlFor="home-seoKeywords">SEO Keywords</Label>
+                                <Input id="home-seoKeywords" value={currentContent.seo.keywords} onChange={(e) => handleContentChange('seo', 'keywords', e.target.value)} placeholder="e.g., rice, basmati, export" />
+                                 <p className="text-xs text-muted-foreground">Enter keywords separated by commas.</p>
+                            </div>
                         </div>
                     </div>
                 </ScrollArea>
@@ -3038,4 +3080,3 @@ function SeoEditDialog({ isOpen, setIsOpen, content, onSave }: SeoEditDialogProp
         </Dialog>
     );
 }
-

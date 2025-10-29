@@ -1,4 +1,5 @@
 
+
 export interface Service {
     id: string;
     icon: string;
@@ -18,11 +19,17 @@ export interface AboutContent {
         title: string;
         items: Service[];
     };
+    seo: {
+        title: string;
+        description: string;
+        keywords: string;
+    };
 }
 
 export async function getAboutContent(): Promise<AboutContent | null> {
     try {
-        const response = await fetch('/api/about');
+        const baseUrl = typeof window === 'undefined' ? (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : 'http://localhost:9002') : '';
+        const response = await fetch(`${baseUrl}/api/about`);
         if (!response.ok) {
             throw new Error('Failed to fetch about content');
         }

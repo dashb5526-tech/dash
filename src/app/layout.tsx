@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/layout/whatsapp-fab";
@@ -15,7 +16,10 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    title: seoData.title,
+    title: {
+      default: seoData.title,
+      template: `%s | ${seoData.title}`,
+    },
     description: seoData.description,
     keywords: seoData.keywords,
   };
