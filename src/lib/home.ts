@@ -1,4 +1,5 @@
 
+
 export interface HomeContent {
     brand: {
         name: string;
@@ -13,9 +14,16 @@ export interface HomeContent {
     };
 }
 
+function getBaseUrl() {
+  if (typeof window !== 'undefined') return '';
+  if (process.env.NEXT_PUBLIC_VERCEL_URL) return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+  return 'http://localhost:9002';
+}
+
 export async function getHomeContent(): Promise<HomeContent | null> {
     try {
-        const response = await fetch('/api/home');
+        const baseUrl = getBaseUrl();
+        const response = await fetch(`${baseUrl}/api/home`);
         if (!response.ok) {
             throw new Error('Failed to fetch home content');
         }

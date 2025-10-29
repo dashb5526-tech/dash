@@ -11,8 +11,16 @@ import { CheckCircle2 } from 'lucide-react';
 import { Product } from '@/lib/products';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { HomeContent, getHomeContent } from '@/lib/home';
 
 const productsFilePath = path.join(process.cwd(), 'src/lib/products.json');
+
+function getBaseUrl() {
+  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+  }
+  return 'http://localhost:9002';
+}
 
 async function getProducts(): Promise<Product[]> {
   try {
@@ -36,6 +44,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProduct(params.productName);
+  const homeContent = await getHomeContent();
 
   if (!product) {
     return {
@@ -43,21 +52,83 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const title = product.seoTitle || product.name;
+  const description = product.seoDescription || product.description;
+  const keywords = product.seoKeywords || product.name;
+  const baseUrl = getBaseUrl();
+  const productUrl = `${baseUrl}/products/${params.productName}`;
+  const imageUrl = product.imageUrl ? `${baseUrl}${product.imageUrl}` : '';
+
+
   return {
-    title: product.seoTitle || product.name,
-    description: product.seoDescription || product.description,
-    keywords: product.seoKeywords || product.name,
+    title: title,
+    description: description,
+    keywords: keywords,
+    openGraph: {
+      title: title,
+      description: description,
+      url: productUrl,
+      siteName: homeContent?.brand.name || 'Dash Rice Traders',
+      images: imageUrl ? [
+        {
+          url: imageUrl,
+          width: 800,
+          height: 600,
+          alt: product.name,
+        },
+      ] : [],
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: title,
+      description: description,
+      images: imageUrl ? [imageUrl] : [],
+    },
   };
 }
 
 export default async function ProductPage({ params }: Props) {
   const product = await getProduct(params.productName);
+  const homeContent = await getHomeContent();
 
   if (!product) {
     notFound();
   }
   
+  const baseUrl = getBaseUrl();
+  const productUrl = `${baseUrl}/products/${params.productName}`;
+  const imageUrl = product.imageUrl ? `${baseUrl}${product.imageUrl}` : undefined;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description,
+    image: imageUrl,
+    url: productUrl,
+    brand: {
+      '@type': 'Brand',
+      name: homeContent?.brand.name || 'Dash Rice Traders',
+    },
+    sku: product.imageId, // Using imageId as a stand-in for SKU
+    // If you add pricing, you can include offers
+    // "offers": {
+    //   "@type": "Offer",
+    //   "url": productUrl,
+    //   "priceCurrency": "INR",
+    //   "price": "100.00",
+    //   "availability": "https://schema.org/InStock"
+    // }
+  };
+
   return (
+    <>
+    <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
       <main className="flex-1 bg-secondary py-16 sm:py-20 lg:py-24">
@@ -127,6 +198,7 @@ export default async function ProductPage({ params }: Props) {
       </main>
       <Footer />
     </div>
+    </>
   );
 }
 
@@ -137,4 +209,3 @@ export async function generateStaticParams() {
     productName: product.name.toLowerCase().replace(/\s+/g, '-'),
   }));
 }
-
