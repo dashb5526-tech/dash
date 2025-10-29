@@ -51,7 +51,7 @@ export function Hero() {
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Link href="/products">View Our Products</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+              <Button asChild size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                 <Link href="/contact">Contact Us</Link>
               </Button>
             </div>
