@@ -1,3 +1,4 @@
+
 export interface Product {
   name: string;
   description: string;
@@ -6,6 +7,9 @@ export interface Product {
   specifications: { key: string; value: string }[];
   varieties: string[];
   certifications: string[];
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
 }
 
 export async function getProducts(): Promise<Product[]> {

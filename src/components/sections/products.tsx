@@ -17,6 +17,7 @@ import { CheckCircle2 } from "lucide-react";
 function ProductCard({ product }: { product: Product }) {
   const imageSrc = product.imageUrl || PlaceHolderImages.find(p => p.id === product.imageId)?.imageUrl;
   const imageHint = product.imageUrl ? undefined : PlaceHolderImages.find(p => p.id === product.imageId)?.imageHint;
+  const productUrl = `/products/${encodeURIComponent(product.name.toLowerCase().replace(/\s+/g, '-'))}`;
 
   return (
     <Card className="flex flex-col overflow-hidden transition-shadow duration-300 hover:shadow-xl">
@@ -32,54 +33,20 @@ function ProductCard({ product }: { product: Product }) {
           </div>
         )}
       <CardHeader className="p-2 sm:p-4">
-        <CardTitle className="font-headline text-base sm:text-xl line-clamp-2">{product.name}</CardTitle>
+        <CardTitle className="font-headline text-base sm:text-xl line-clamp-2">
+          <Link href={productUrl} className="hover:text-primary transition-colors">
+            {product.name}
+          </Link>
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col p-2 pt-0 sm:p-4 sm:pt-0 space-y-4">
         <CardDescription className="text-xs sm:text-sm line-clamp-3">
           {product.description}
         </CardDescription>
 
-        {product.specifications && product.specifications.length > 0 && (
-          <div>
-            <h4 className="font-semibold text-sm mb-2">Specifications:</h4>
-            <ul className="space-y-1 text-xs text-muted-foreground list-disc list-inside">
-              {product.specifications.map((spec, i) => (
-                <li key={i}>
-                  <span className="font-medium text-foreground/80">{spec.key}:</span> {spec.value}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {product.varieties && product.varieties.length > 0 && (
-          <div>
-            <h4 className="font-semibold text-sm mb-2">Available Varieties:</h4>
-            <div className="flex flex-wrap gap-2">
-              {product.varieties.map((variety) => (
-                <Badge key={variety} variant="secondary" className="text-xs">{variety}</Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {product.certifications && product.certifications.length > 0 && (
-          <div>
-            <h4 className="font-semibold text-sm mb-2">Certifications:</h4>
-            <div className="flex flex-wrap gap-2">
-              {product.certifications.map((cert) => (
-                <Badge key={cert} className="bg-green-100 text-green-800 border-green-200 text-xs hover:bg-green-200">
-                  <CheckCircle2 className="h-3 w-3 mr-1"/>
-                  {cert}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="!mt-auto pt-4">
-          <Button asChild variant="outline" size="sm" className="w-full border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white">
-              <Link href="/contact">Request Quote</Link>
+        <div className="!mt-auto pt-4 flex flex-col sm:flex-row gap-2">
+          <Button asChild className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+              <Link href={productUrl}>View Details</Link>
           </Button>
         </div>
       </CardContent>
@@ -126,5 +93,3 @@ export function Products({ isHomePage = false }: { isHomePage?: boolean }) {
     </section>
   );
 }
-
-    

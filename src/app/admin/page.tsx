@@ -1525,6 +1525,9 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
     const [certifications, setCertifications] = useState<string[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [seoTitle, setSeoTitle] = useState("");
+    const [seoDescription, setSeoDescription] = useState("");
+    const [seoKeywords, setSeoKeywords] = useState("");
     const { toast } = useToast();
 
     useEffect(() => {
@@ -1537,6 +1540,9 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
                 setVarieties(product.varieties || []);
                 setCertifications(product.certifications || []);
                 setPreviewUrl(product.imageUrl);
+                setSeoTitle(product.seoTitle || '');
+                setSeoDescription(product.seoDescription || '');
+                setSeoKeywords(product.seoKeywords || '');
             } else {
                 setName("");
                 setDescription("");
@@ -1545,6 +1551,9 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
                 setVarieties([]);
                 setCertifications([]);
                 setPreviewUrl(null);
+                setSeoTitle('');
+                setSeoDescription('');
+                setSeoKeywords('');
             }
             setSelectedFile(null);
         }
@@ -1603,7 +1612,10 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
             imageUrl: product?.imageUrl || previewUrl,
             specifications: specifications.filter(s => s.key && s.value),
             varieties,
-            certifications
+            certifications,
+            seoTitle,
+            seoDescription,
+            seoKeywords
         };
         
         onSave(productData, selectedFile);
@@ -1625,7 +1637,7 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
                     </DialogClose>
                 </DialogHeader>
                 <ScrollArea className="h-[70vh] pr-6">
-                    <div className="grid gap-6 py-4">
+                    <div className="space-y-6 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right">Name</Label>
                             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" disabled={!!product} />
@@ -1674,6 +1686,24 @@ function ProductEditDialog({ isOpen, setIsOpen, product, onSave }: ProductEditDi
                             <Input id="certifications" value={certifications.join(', ')} onChange={(e) => handleTagChange(setCertifications, e.target.value)} placeholder="e.g., Organic, Export Grade" />
                             <p className="text-xs text-muted-foreground">Enter tags separated by commas.</p>
                         </div>
+
+                        <div className="space-y-4 pt-4 border-t">
+                            <h3 className="text-lg font-medium">Product SEO</h3>
+                             <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="seoTitle" className="text-right">SEO Title</Label>
+                                <Input id="seoTitle" value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} className="col-span-3" placeholder="Custom title for search engines" />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="seoDescription" className="text-right">SEO Description</Label>
+                                <Textarea id="seoDescription" value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} className="col-span-3" placeholder="Custom description for search engines" />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="seoKeywords" className="text-right">SEO Keywords</Label>
+                                <Input id="seoKeywords" value={seoKeywords} onChange={(e) => setSeoKeywords(e.target.value)} className="col-span-3" placeholder="e.g., product, rice, basmati" />
+                                 <p className="col-span-4 text-xs text-muted-foreground text-right">Enter keywords separated by commas.</p>
+                            </div>
+                        </div>
+
                     </div>
                 </ScrollArea>
                 <DialogFooter>
@@ -3008,3 +3038,4 @@ function SeoEditDialog({ isOpen, setIsOpen, content, onSave }: SeoEditDialogProp
         </Dialog>
     );
 }
+
