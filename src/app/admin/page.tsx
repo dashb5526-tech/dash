@@ -47,6 +47,7 @@ import { getContactSection, saveContactSection, ContactSection } from "@/lib/con
 import { getTermsContent, saveTermsContent, TermsContent } from "@/lib/terms";
 import { getCertificates, saveCertificates, Certificate } from "@/lib/certificates";
 import { getCertificatesSection, saveCertificatesSection, CertificatesSection } from "@/lib/certificates-section";
+import { getSeoContent, saveSeoContent, SeoContent } from "@/lib/seo";
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash2, Star, Facebook, Instagram, Linkedin, X } from "lucide-react";
@@ -81,6 +82,7 @@ export default function AdminPage() {
   const [termsContent, setTermsContent] = useState<TermsContent | null>(null);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [certificatesSection, setCertificatesSection] = useState<CertificatesSection | null>(null);
+  const [seoContent, setSeoContent] = useState<SeoContent | null>(null);
 
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
@@ -98,6 +100,7 @@ export default function AdminPage() {
   const [isTermsDialogOpen, setIsTermsDialogOpen] = useState(false);
   const [isCertificateDialogOpen, setIsCertificateDialogOpen] = useState(false);
   const [isCertificatesSectionDialogOpen, setIsCertificatesSectionDialogOpen] = useState(false);
+  const [isSeoDialogOpen, setIsSeoDialogOpen] = useState(false);
 
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -125,6 +128,7 @@ export default function AdminPage() {
     getTermsContent().then(setTermsContent);
     getCertificates().then(setCertificates);
     getCertificatesSection().then(setCertificatesSection);
+    getSeoContent().then(setSeoContent);
   }, []);
 
   const openProductDialogForNew = () => {
@@ -813,6 +817,24 @@ export default function AdminPage() {
       }
     };
 
+    const handleSeoSave = async (newSeoContent: SeoContent) => {
+      try {
+        setSeoContent(newSeoContent);
+        await saveSeoContent(newSeoContent);
+        toast({
+          title: "Changes Saved",
+          description: "SEO settings have been saved successfully.",
+        });
+        setIsSeoDialogOpen(false);
+      } catch (error: any) {
+        toast({
+          title: "Save Failed",
+          description: error.message || "Failed to save SEO settings.",
+          variant: "destructive",
+        });
+      }
+    };
+
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -832,6 +854,7 @@ export default function AdminPage() {
                 <TabsTrigger value="contact">Contact</TabsTrigger>
                 <TabsTrigger value="social">Social Media</TabsTrigger>
                 <TabsTrigger value="legal">Legal</TabsTrigger>
+                <TabsTrigger value="seo">SEO</TabsTrigger>
               </TabsList>
               <ScrollBar orientation="horizontal" className="h-2" />
             </ScrollArea>
@@ -1313,6 +1336,44 @@ export default function AdminPage() {
                     </CardContent>
                 </Card>
             </TabsContent>
+            <TabsContent value="seo" className="pt-6">
+                <Card>
+                    <CardHeader className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1">
+                            <CardTitle className="font-headline text-2xl">
+                                SEO Management
+                            </CardTitle>
+                            <CardDescription>
+                                Manage your site-wide SEO settings.
+                            </CardDescription>
+                        </div>
+                        <Button onClick={() => setIsSeoDialogOpen(true)} className="w-full sm:w-auto" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={!seoContent}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit SEO
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        {seoContent ? (
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="font-semibold">Site Title</h4>
+                                    <p className="text-sm text-muted-foreground">{seoContent.title}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Meta Description</h4>
+                                    <p className="text-sm text-muted-foreground">{seoContent.description}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Meta Keywords</h4>
+                                    <p className="text-sm text-muted-foreground">{seoContent.keywords}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>Loading SEO content...</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </TabsContent>
           </Tabs>
         </section>
       </main>
@@ -1423,6 +1484,14 @@ export default function AdminPage() {
           setIsOpen={setIsCertificatesSectionDialogOpen}
           content={certificatesSection}
           onSave={handleCertificatesSectionSave}
+        />
+      )}
+       {seoContent && (
+        <SeoEditDialog
+          isOpen={isSeoDialogOpen}
+          setIsOpen={setIsSeoDialogOpen}
+          content={seoContent}
+          onSave={handleSeoSave}
         />
       )}
     </div>
@@ -2867,5 +2936,64 @@ function CertificatesSectionEditDialog({ isOpen, setIsOpen, content, onSave }: C
   );
 }
     
+interface SeoEditDialogProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    content: SeoContent;
+    onSave: (content: SeoContent) => void;
+}
 
-    
+function SeoEditDialog({ isOpen, setIsOpen, content, onSave }: SeoEditDialogProps) {
+    const [currentContent, setCurrentContent] = useState<SeoContent>(content);
+
+    useEffect(() => {
+        if (isOpen) {
+            setCurrentContent(content);
+        }
+    }, [isOpen, content]);
+
+    const handleContentChange = (field: keyof SeoContent, value: string) => {
+        setCurrentContent(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleSubmit = () => {
+        onSave(currentContent);
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                    <DialogTitle>Edit SEO Settings</DialogTitle>
+                    <DialogDescription>
+                        Manage your site-wide title, description, and keywords.
+                    </DialogDescription>
+                    <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-4">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </DialogClose>
+                </DialogHeader>
+                <div className="grid gap-6 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="seo-title">Site Title</Label>
+                        <Input id="seo-title" value={currentContent.title} onChange={(e) => handleContentChange('title', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="seo-description">Meta Description</Label>
+                        <Textarea id="seo-description" value={currentContent.description} onChange={(e) => handleContentChange('description', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="seo-keywords">Meta Keywords</Label>
+                        <Input id="seo-keywords" value={currentContent.keywords} onChange={(e) => handleContentChange('keywords', e.target.value)} placeholder="e.g., rice, basmati, export" />
+                        <p className="text-xs text-muted-foreground">Enter keywords separated by commas.</p>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button type="button" onClick={handleSubmit}>Save Changes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}

@@ -2,11 +2,24 @@ import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/layout/whatsapp-fab";
 import "./globals.css";
+import { getSeoContent } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Dash Rice Traders",
-  description: "A trusted rice trading and distribution company providing high-quality rice varieties.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seoData = await getSeoContent();
+
+  if (!seoData) {
+    return {
+      title: "Dash Rice Traders",
+      description: "A trusted rice trading and distribution company providing high-quality rice varieties.",
+    };
+  }
+
+  return {
+    title: seoData.title,
+    description: seoData.description,
+    keywords: seoData.keywords,
+  };
+}
 
 export default function RootLayout({
   children,
