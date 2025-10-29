@@ -1,12 +1,22 @@
+
 export interface SeoContent {
   title: string;
   description: string;
   keywords: string;
 }
 
+function getBaseUrl() {
+  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+  }
+  // Assume localhost for development
+  return 'http://localhost:9002';
+}
+
 export async function getSeoContent(): Promise<SeoContent | null> {
   try {
-    const response = await fetch('/api/seo', { next: { revalidate: 60 } }); // Add revalidation
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}/api/seo`, { next: { revalidate: 60 } }); // Add revalidation
     if (!response.ok) {
       throw new Error('Failed to fetch SEO content');
     }
