@@ -71,7 +71,7 @@ function Login({ onLoginSuccess }: { onLoginSuccess: () => void }) {
     const { toast } = useToast();
 
     const handleLogin = () => {
-        if (password === 'SBS') {
+        if (password.toUpperCase() === 'SBS') {
             onLoginSuccess();
             toast({
                 title: "Access Granted",

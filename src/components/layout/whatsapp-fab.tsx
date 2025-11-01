@@ -21,9 +21,14 @@ function WhatsAppIcon(props: React.SVGProps<SVGSVGElement>) {
 export function WhatsAppFAB() {
     const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
     const [isVisible, setIsVisible] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        getContactInfo().then(setContactInfo);
+        const fetchContactInfo = () => {
+            getContactInfo().then(setContactInfo);
+        };
+
+        fetchContactInfo();
 
         const toggleVisibility = () => {
             if (window.pageYOffset > 300) {
@@ -34,8 +39,12 @@ export function WhatsAppFAB() {
         };
 
         window.addEventListener('scroll', toggleVisibility);
+        window.addEventListener('focus', fetchContactInfo);
 
-        return () => window.removeEventListener('scroll', toggleVisibility);
+        return () => {
+            window.removeEventListener('scroll', toggleVisibility);
+            window.removeEventListener('focus', fetchContactInfo);
+        };
     }, []);
 
     if (!contactInfo || !contactInfo.whatsappNumber) {
@@ -45,18 +54,49 @@ export function WhatsAppFAB() {
     const phoneNumber = contactInfo.whatsappNumber.replace(/\D/g, '');
     const whatsappUrl = `https://wa.me/${phoneNumber}`;
 
+    const handleToggle = () => {
+        setIsOpen(!isOpen);
+    };
+
     return (
-        <Link 
-            href={whatsappUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={cn(
-                "fixed bottom-6 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-opacity duration-300 hover:bg-[#128C7E]",
-                isVisible ? 'opacity-100' : 'opacity-0'
+        <>
+            {isOpen && (
+                <div className="fixed bottom-24 right-6 z-40 w-80 bg-white border border-gray-200 rounded-lg shadow-xl">
+                    <div className="flex items-center justify-between p-4 bg-[#25D366] text-white rounded-t-lg">
+                        <h3 className="text-lg font-semibold">Chat with us on WhatsApp</h3>
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="text-white hover:text-gray-200"
+                            aria-label="Close chat window"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div className="p-4">
+                        <p className="text-gray-700 mb-4">Hi! How can we help you today?</p>
+                        <Link
+                            href={whatsappUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block w-full bg-[#25D366] text-white text-center py-2 px-4 rounded-md hover:bg-[#128C7E] transition-colors"
+                        >
+                            Start Chat
+                        </Link>
+                    </div>
+                </div>
             )}
-            aria-label="Chat on WhatsApp"
-        >
-            <WhatsAppIcon className="h-8 w-8" />
-        </Link>
+            <button
+                onClick={handleToggle}
+                className={cn(
+                    "fixed bottom-6 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-opacity duration-300 hover:bg-[#128C7E]",
+                    isVisible ? 'opacity-100' : 'opacity-0'
+                )}
+                aria-label="Open WhatsApp chat"
+            >
+                <WhatsAppIcon className="h-8 w-8" />
+            </button>
+        </>
     );
 }
